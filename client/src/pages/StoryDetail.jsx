@@ -22,45 +22,44 @@ const StoryDetail = () => {
     const [loadingSummary, setLoadingSummary] = useState(false);
 
     const dummyData = {
-        'd00000000000000000000001': {
+        'd000000000000000000000001': {
             title: 'The Midnight Star',
             content: "Under the silver moon, the stars began to dance in a rhythm only the night knew. Leo lived in a coastal village where the ocean roared like a lion. Every night, Leo would climb the highest cliff, reaching his small hands toward the velvet sky, hoping for a spark to land in his palm. He had heard legends of the Star-Fall, a night every hundred years when the heavens weep light. The villagers laughed at his obsession, calling him the 'Boy of Dust', but Leo knew better. He felt the pull of the cosmos in his bones. \n\nOne evening, as the tide pulled back further than ever before, a trail of stardust appeared on the damp sand. Leo followed it, his heart pounding a frantic rhythm against his ribs. The trail led him to a hidden grotto, where the walls glowed with phosphorescence. In the center, a fragment of the sun itself seemed to pulse. It wasn't just light; it was a living, breathing ember of the universe. Leo reached out, his fingertips grazing the warmth, and in that moment, the entire village was bathed in a brilliant, sapphire glow that stayed in the sky for three full days.",
             authorName: 'Luna Lovegood',
             tags: ['Fantasy', 'Short Story'],
             likes: 124,
             averageRating: 4.9,
-            createdAt: new Date().toISOString(),
-            comments: []
+            createdAt: '2024-03-10'
         },
-        'd00000000000000000000002': {
+        'd000000000000000000000002': {
             title: 'Echoes of the Forest',
             content: "Caspian walked through the ancient groves where the trees whispered secrets of a time before man. The moss felt like a plush carpet under his boots as he followed the trail of glowing butterflies deep into the heart of the woods. He had been a tracker for ten years, but these woods were different. The sunlight filtered through the leaves in patterns that seemed like a forgotten language. \n\nSuddenly, the wind died down, and the silence became heavy. Caspian knelt by a stream that flowed with silver water. In the reflection, he didn't see himself; he saw a version of the forest that was vibrant and full of mythical beasts. A dragon made of vines and flowers watched him from the other side. It didn't growl; it nodded, as if acknowledging a fellow guardian. Caspian realized then that he wasn't tracking the forest—the forest was tracking him, testing his worthiness to enter the Inner Sanctum where the Heart of Nature beats eternally.",
             authorName: 'Caspian Thorne',
             tags: ['Adventure', 'Nature'],
             likes: 89,
-            averageRating: 4.7,
-            createdAt: new Date().toISOString(),
-            comments: []
+            views: 850,
+            averageRating: 4.5,
+            createdAt: '2024-03-12'
         },
-        'd00000000000000000000003': {
+        'd000000000000000000000003': {
             title: 'Clockwork Dreams',
-            content: "In the city of brass and steam, Arthur worked on his greatest invention: a heart made of clockwork. Ticking and whirring, the device promised to bring life to his silent mechanical daughter, Elara. The city, known as Gear-Haven, was a labyrinth of copper pipes and soot-stained clouds. Arthur had spent forty years scavenging the rarest metals and polishing the finest gems to power the core. \n\nAs the lightning storm reached its peak, Arthur connected the final conduit. The workshop vibrated with the power of the heavens. Elara's eyes, made of sapphire glass, suddenly flickered. Her metal chest rose and fell in a perfectly timed sequence of clicks. She reached out a cold, brass hand and touched Arthur's tear-stained cheek. 'Father?' she whispered, the voice clear as a silver bell. The miracle of Gear-Haven had been achieved, not through cold science alone, but through the desperate love of a man who refused to give up on his dreams.",
+            content: "The city of Oakhaven breathed smoke...",
             authorName: 'Arthur Gears',
-            tags: ['Steampunk', 'Mystery'],
+            tags: ['Steampunk', 'Sci-Fi'],
             likes: 245,
-            averageRating: 4.8,
-            createdAt: new Date().toISOString(),
-            comments: []
+            views: 3100,
+            averageRating: 4.9,
+            createdAt: '2024-03-15'
         },
-        'd00000000000000000000004': {
+        'd000000000000000000000004': {
             title: 'The Last Alchemist',
-            content: "Julian stirred the golden liquid in the vial, watching as the smoke turned from violent purple to a soothing blue. The Philosopher's Stone was finally within his grasp, but the cost was higher than he had ever imagined. He sat in his basement laboratory, surrounded by leather-bound journals and jars of powdered dragon-scale. The air smelled of sulfur and ancient spices. \n\nTo achieve the Final Transmutation, one required the sacrifice of a memory. Not just any memory, but the one you hold most dear. Julian looked at the portrait of his late wife, Clara. It was the memory of their first dance under the willow tree that the ritual demanded. He hesitated, the golden liquid shimmering temptingly. In the end, he poured the potion into the earth. 'Gold is but lead that has learned to lie,' he whispered. He would rather live in poverty with his memories than in a castle of gold with a hollow heart. The stone remained unformed, but Julian found a peace that no alchemy could ever provide.",
+            content: "Nicholas stood before the golden crucible...",
             authorName: 'Julian Thorne',
-            tags: ['Historical', 'Magic'],
+            tags: ['Historical', 'Mystery'],
             likes: 560,
-            averageRating: 5.0,
-            createdAt: new Date().toISOString(),
-            comments: []
+            views: 5200,
+            averageRating: 4.7,
+            createdAt: '2024-03-20'
         }
     };
 

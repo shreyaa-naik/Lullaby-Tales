@@ -38,10 +38,10 @@ router.get('/:id', async (req, res) => {
 
         if (isDummy) {
             const dummyBases = {
-                'd00000000000000000000001': { title: 'The Midnight Star', likes: 124 },
-                'd00000000000000000000002': { title: 'Echoes of the Forest', likes: 89 },
-                'd00000000000000000000003': { title: 'Clockwork Dreams', likes: 245 },
-                'd00000000000000000000004': { title: 'The Last Alchemist', likes: 560 }
+                'd000000000000000000000001': { title: 'The Midnight Star', likes: 124 },
+                'd000000000000000000000002': { title: 'Echoes of the Forest', likes: 89 },
+                'd000000000000000000000003': { title: 'Clockwork Dreams', likes: 245 },
+                'd000000000000000000000004': { title: 'The Last Alchemist', likes: 560 }
             };
             const dm = dummyBases[id] || { title: 'Unknown', likes: 0 };
             return res.json({
@@ -175,10 +175,10 @@ router.put('/:id/like', auth, async (req, res) => {
         }
 
         const dummyBases = {
-            'd00000000000000000000001': 124,
-            'd00000000000000000000002': 89,
-            'd00000000000000000000003': 245,
-            'd00000000000000000000004': 560
+            'd000000000000000000000001': 124,
+            'd000000000000000000000002': 89,
+            'd000000000000000000000003': 245,
+            'd000000000000000000000004': 560
         };
 
         const totalLikes = story ? story.likes : 
