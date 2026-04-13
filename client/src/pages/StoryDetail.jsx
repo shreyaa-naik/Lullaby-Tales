@@ -235,14 +235,13 @@ const StoryDetail = () => {
     const handleLike = async () => {
         if (!user) return toast.error('Please sign in to like');
         
-        // Optimistic UI update
+        // Optimistic UI update: Turn red and change number instantly (like Instagram)
         const willBeLiked = !liked;
+        const newLikesCount = willBeLiked ? (story.likes + 1) : Math.max(0, story.likes - 1);
+        
         setLiked(willBeLiked);
+        setStory({ ...story, likes: newLikesCount });
 
-        // Dummy story: early exit
-        if (dummyData[id]) return;
-
-        // Real story: save to DB
         try {
             const token = localStorage.getItem('token');
             const res = await fetch(`${API_BASE_URL}/api/stories/${id}/like`, {
@@ -251,12 +250,19 @@ const StoryDetail = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                setStory({ ...story, likes: data.likes });
+                // Sync with server's absolute count
+                setStory(prev => ({ ...prev, likes: data.likes }));
                 setLiked(data.isLiked);
+            } else {
+                // Revert if server fails
+                setLiked(!willBeLiked);
+                setStory(prev => ({ ...prev, likes: story.likes }));
+                toast.error("Cloud sync failed");
             }
         } catch (err) { 
             console.error(err);
-            setLiked(!willBeLiked); // Revert on failure
+            setLiked(!willBeLiked);
+            setStory(prev => ({ ...prev, likes: story.likes }));
         }
     };
 

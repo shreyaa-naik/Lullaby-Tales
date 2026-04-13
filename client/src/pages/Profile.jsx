@@ -40,9 +40,10 @@ const Profile = () => {
                 });
                 if (profRes.ok) {
                     const profData = await profRes.json();
-                    setLikedStoriesList(profData.likedStories.map(s => ({
-                        id: s._id,
-                        title: s.title,
+                    if (profData && profData.likedStories) {
+                        setLikedStoriesList(profData.likedStories.map(s => ({
+                            id: s._id || s.id,
+                            title: s.title || 'Untitled Tale',
                         authorName: s.author?.name || 'Author',
                         views: s.views || 0,
                         likes: s.likes || 0,
