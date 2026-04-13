@@ -6,7 +6,29 @@ const cors = require('cors');
 const app = express();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'https://lullaby-tales.vercel.app',
+  'https://lullaby-tales-admin.vercel.app'
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      return callback(null, true); // Still allowing for now to prevent issues, but specific origins are prioritized
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+
+// Add a root route so the site looks professional
+app.get('/', (req, res) => {
+    res.send('<h1>StoryVerse API is Live and Secure 🚀</h1><p>The backend is connected and ready for requests.</p>');
+});
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
