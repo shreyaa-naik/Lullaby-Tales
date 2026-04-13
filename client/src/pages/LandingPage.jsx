@@ -18,12 +18,13 @@ import {
     Search
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import API_BASE_URL from '../config';
 
 const LandingPage = () => {
     const [config, setConfig] = React.useState({ siteName: 'LullabyTales', heroSubtitle: 'Discover thousands of hand-crafted tales from a global community of authentic authors.' });
     
     React.useEffect(() => {
-        fetch('http://localhost:5000/api/config').then(r=>r.json()).then(data => {
+        fetch(`${API_BASE_URL}/api/config`).then(r=>r.json()).then(data => {
             if(data) setConfig(data);
         }).catch(()=>{});
     }, []);

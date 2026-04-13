@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Send, X, Plus, Info, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config';
 
 const CreateStory = () => {
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ const CreateStory = () => {
         
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/stories', {
+            const res = await fetch(`${API_BASE_URL}/api/stories`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

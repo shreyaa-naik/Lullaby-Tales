@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, X, Info, ShieldCheck, Edit3 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config';
 
 const EditStory = () => {
     const { id } = useParams();
@@ -12,7 +13,7 @@ const EditStory = () => {
     useEffect(() => {
         const fetchStory = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/stories/${id}`);
+                const res = await fetch(`${API_BASE_URL}/api/stories/${id}`);
                 const story = await res.json();
                 if (story) {
                     setFormData({
@@ -35,7 +36,7 @@ const EditStory = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/stories/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',

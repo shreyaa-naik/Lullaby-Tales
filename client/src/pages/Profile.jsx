@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { User, Mail, Calendar, Edit3, Heart, Settings, ShieldCheck, MapPin, Bookmark, BookOpen } from 'lucide-react';
 import StoryCard from '../components/StoryCard';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config';
 
 const Profile = () => {
     const { user, savedStories } = useAuth();
@@ -19,7 +20,7 @@ const Profile = () => {
                 const token = localStorage.getItem('token');
                 
                 // Fetch User's Created Stories
-                const res = await fetch('http://localhost:5000/api/stories');
+                const res = await fetch(`${API_BASE_URL}/api/stories`);
                 const allStories = await res.json();
                 const mine = allStories.filter(s => s.author?._id === user?.id || s.author === user?.id);
                 setUserStories(mine.map(s => ({
@@ -34,7 +35,7 @@ const Profile = () => {
                 })));
 
                 // Fetch User's Liked Stories via Profile Endpoint
-                const profRes = await fetch('http://localhost:5000/api/auth/profile', {
+                const profRes = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                     headers: { 'x-auth-token': token }
                 });
                 if (profRes.ok) {
@@ -64,7 +65,7 @@ const Profile = () => {
         if (!window.confirm('Delete this tale forever?')) return;
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/stories/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });

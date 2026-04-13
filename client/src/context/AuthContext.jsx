@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import API_BASE_URL from '../config';
 
 const AuthContext = createContext();
 
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
             if (token && savedUser) {
                 try {
                     // Quick profile check to verify token validity
-                    const res = await fetch('http://localhost:5000/api/auth/profile', {
+                    const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                         headers: { 'x-auth-token': token }
                     });
                     

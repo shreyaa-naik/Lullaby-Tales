@@ -50,7 +50,7 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/feed" element={<StoryFeed />} />
-          <Route path="/story/:id" element={<ProtectedRoute><StoryDetail /></ProtectedRoute>} />
+          <Route path="/story/:id" element={<StoryDetail />} />
           <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
           <Route path="/edit-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

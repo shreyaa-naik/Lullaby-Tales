@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Heart, Star, MessageCircle, Sparkles, User, Calendar, ArrowLeft, Bookmark, BookmarkCheck, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import API_BASE_URL from '../config';
 
 const StoryDetail = () => {
     const { id } = useParams();
@@ -69,7 +70,7 @@ const StoryDetail = () => {
         // Use backend API if it's a real story
         if (!id.startsWith('d0000')) {
           try {
-              const res = await fetch('http://localhost:5000/api/summary', {
+              const res = await fetch(`${API_BASE_URL}/api/summary`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ content: text })
@@ -104,7 +105,7 @@ const StoryDetail = () => {
 
             try {
                 const token = localStorage.getItem('token');
-                const res = await fetch(`http://localhost:5000/api/stories/${id}`, {
+                const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
                     headers: { 'x-auth-token': token || '' }
                 });
                 const found = await res.json();
@@ -125,7 +126,7 @@ const StoryDetail = () => {
                     toast.error("Story not found.");
                 }
 
-                const commRes = await fetch(`http://localhost:5000/api/comments/${id}`);
+                const commRes = await fetch(`${API_BASE_URL}/api/comments/${id}`);
                 if (commRes.ok) {
                     const commData = await commRes.json();
                     setComments(commData);
@@ -144,10 +145,15 @@ const StoryDetail = () => {
         if (!user) return toast.error("Please login to comment");
         if (!comment.trim()) return;
 
+        if (!user) {
+            toast.error("Please log in to post a comment.");
+            return;
+        }
+
         setPosting(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/comments', {
+            const res = await fetch(`${API_BASE_URL}/api/comments`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -184,7 +190,7 @@ const StoryDetail = () => {
         // Real story: save to DB
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/stories/${id}/rate`, {
+            const res = await fetch(`${API_BASE_URL}/api/stories/${id}/rate`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -213,7 +219,7 @@ const StoryDetail = () => {
         // Real story: save to DB
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/stories/${id}/like`, {
+            const res = await fetch(`${API_BASE_URL}/api/stories/${id}/like`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
@@ -368,24 +374,33 @@ const StoryDetail = () => {
                     Community Feedback
                 </h3>
 
-                <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-8">
-                    <textarea
-                        placeholder="Share your thoughts on this tale..."
-                        className="w-full min-h-[120px] p-4 rounded-xl border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all resize-none mb-4"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                    ></textarea>
-                    <div className="flex justify-end">
-                        <button 
-                            onClick={handlePostComment}
-                            disabled={posting}
-                            className="px-6 py-2 rounded-xl font-bold text-white transition-all disabled:opacity-50"
-                            style={{ backgroundColor: '#D49E8D' }}
-                        >
-                            {posting ? 'Posting...' : 'Post Comment'}
-                        </button>
+                {user ? (
+                    <div className="bg-white rounded-2xl border border-slate-100 p-6 mb-8">
+                        <textarea
+                            placeholder="Share your thoughts on this tale..."
+                            className="w-full min-h-[120px] p-4 rounded-xl border border-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all resize-none mb-4"
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                        ></textarea>
+                        <div className="flex justify-end">
+                            <button 
+                                onClick={handlePostComment}
+                                disabled={posting}
+                                className="px-6 py-2 rounded-xl font-bold text-white transition-all disabled:opacity-50"
+                                style={{ backgroundColor: '#D49E8D' }}
+                            >
+                                {posting ? 'Posting...' : 'Post Comment'}
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="bg-slate-100/50 rounded-2xl border border-dashed border-slate-200 p-10 text-center mb-8">
+                        <p className="text-slate-500 font-medium mb-4">Want to join the conversation?</p>
+                        <Link to="/login" className="inline-block px-8 py-3 rounded-xl font-bold text-white shadow-lg transition-all hover:scale-105 active:scale-95" style={{ backgroundColor: '#D49E8D' }}>
+                            Log in to Comment
+                        </Link>
+                    </div>
+                )}
 
                 <div className="space-y-6">
                     {comments.length === 0 ? (

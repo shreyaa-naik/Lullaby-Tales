@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, Heart, MessageCircle, Star, Plus, Settings, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import API_BASE_URL from '../config';
 import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
@@ -10,7 +11,7 @@ const Dashboard = () => {
 
     const fetchStories = async () => {
         try {
-            const res = await fetch('http://localhost:5000/api/stories');
+            const res = await fetch(`${API_BASE_URL}/api/stories`);
             const data = await res.json();
             if (user) {
                 // Filter backend story response by exactly the logged in user
@@ -28,7 +29,7 @@ const Dashboard = () => {
         
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/stories/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
