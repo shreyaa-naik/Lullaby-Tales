@@ -75,13 +75,31 @@ router.get('/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         
-        // Manually populate liked stories since they are now strings
+        // Manually populate liked stories
         const Story = require('../models/Story');
         const likedIds = user.likedStories || [];
         const populatedLiked = await Story.find({ _id: { $in: likedIds } }).populate('author', 'name');
         
+        // Metadata for default stories so they show up in profile
+        const dummyMeta = {
+            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' } },
+            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' } },
+            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' } },
+            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' } }
+        };
+
+        const finalLiked = likedIds.map(id => {
+            const real = populatedLiked.find(s => s._id.toString() === id);
+            if (real) return real;
+            if (dummyMeta[id]) {
+                const dm = dummyMeta[id];
+                return { _id: id, title: dm.title, author: dm.author, isDummy: true };
+            }
+            return null;
+        }).filter(item => item !== null);
+        
         const userObj = user.toObject();
-        userObj.likedStories = populatedLiked;
+        userObj.likedStories = finalLiked;
         
         res.json(userObj);
     } catch (err) {

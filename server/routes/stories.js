@@ -132,11 +132,16 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 // @route   PUT api/stories/:id/like
-// @desc    Like a story
+// @desc    Like a story (Supports real and dummy stories)
 router.put('/:id/like', auth, async (req, res) => {
     try {
-        const story = await Story.findById(req.params.id);
-        if (!story) return res.status(404).json({ msg: 'Story not found' });
+        const isDummy = req.params.id.startsWith('d000');
+        let story = null;
+        
+        if (!isDummy) {
+            story = await Story.findById(req.params.id);
+            if (!story) return res.status(404).json({ msg: 'Story not found' });
+        }
         
         const user = await User.findById(req.user.id);
         const isLiked = user.likedStories.some(sid => sid.toString() === req.params.id);
@@ -144,16 +149,20 @@ router.put('/:id/like', auth, async (req, res) => {
         if (isLiked) {
             // Unlike
             user.likedStories = user.likedStories.filter(id => id.toString() !== req.params.id);
-            story.likes = Math.max(0, (story.likes || 1) - 1);
+            if (story) story.likes = Math.max(0, (story.likes || 1) - 1);
         } else {
             // Like
             user.likedStories.push(req.params.id);
-            story.likes = (story.likes || 0) + 1;
+            if (story) story.likes = (story.likes || 0) + 1;
         }
 
         await user.save();
-        await story.save();
-        res.json({ likes: story.likes, isLiked: !isLiked });
+        if (story) await story.save();
+        
+        res.json({ 
+            likes: story ? story.likes : (isLiked ? 0 : 1), // Mock likes for dummy if needed
+            isLiked: !isLiked 
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
