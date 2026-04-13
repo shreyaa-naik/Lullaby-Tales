@@ -12,28 +12,23 @@ export const AuthProvider = ({ children }) => {
         const checkAuth = async () => {
             const token = localStorage.getItem('token');
             const savedUser = localStorage.getItem('user');
-            const bookmarks = localStorage.getItem('savedStories');
 
             if (token && savedUser) {
                 try {
-                    // Quick profile check to verify token validity
                     const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                         headers: { 'x-auth-token': token }
                     });
                     
                     if (res.ok) {
-                        setUser(JSON.parse(savedUser));
+                        const data = await res.json();
+                        setUser(data.user);
+                        setSavedStories(data.user.savedStories || []);
                     } else if (res.status === 401) {
-                        // Secret changed or token invalid - clear it
                         logout();
                     }
                 } catch (err) {
                     console.error("Auth check failed", err);
                 }
-            }
-
-            if (bookmarks) {
-                setSavedStories(JSON.parse(bookmarks));
             }
             setLoading(false);
         };
@@ -42,26 +37,40 @@ export const AuthProvider = ({ children }) => {
 
     const login = (userData, token) => {
         setUser(userData);
+        setSavedStories(userData.savedStories || []);
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
     const logout = () => {
         setUser(null);
+        setSavedStories([]);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('savedStories');
     };
 
-    const saveStory = (story) => {
-        const newSaved = [...savedStories, story];
-        setSavedStories(newSaved);
-        localStorage.setItem('savedStories', JSON.stringify(newSaved));
+    const saveStory = async (storyId) => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/save/${storyId}`, {
+                method: 'PUT',
+                headers: { 'x-auth-token': token }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setSavedStories(data.savedStories);
+            }
+        } catch (err) {
+            console.error("Save failed", err);
+        }
     };
 
-    const unsaveStory = (storyId) => {
-        const newSaved = savedStories.filter(s => (s.id || s._id) !== storyId);
-        setSavedStories(newSaved);
-        localStorage.setItem('savedStories', JSON.stringify(newSaved));
+    const unsaveStory = async (storyId) => {
+        // Same as saveStory because it's a toggle
+        await saveStory(storyId);
     };
 
     return (

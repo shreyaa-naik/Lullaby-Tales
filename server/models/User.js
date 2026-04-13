@@ -14,7 +14,8 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    likedStories: [String], // Simple array of strings for all story IDs
+    likedStories: [String], // All story IDs (Real & Dummy)
+    savedStories: [String], // Reading List IDs (Real & Dummy)
     bio: {
         type: String,
         default: ""

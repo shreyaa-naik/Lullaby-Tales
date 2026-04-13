@@ -151,4 +151,59 @@ router.put('/update-profile', auth, async (req, res) => {
     }
 });
 
+// @route   PUT api/auth/save/:id
+// @desc    Save/Unsave story to reading list
+router.put('/save/:id', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        const storyId = req.params.id;
+        
+        let savedArr = (user.savedStories || []).map(s => s.toString());
+        const isSaved = savedArr.includes(storyId);
+
+        if (isSaved) {
+            user.savedStories = savedArr.filter(id => id !== storyId);
+        } else {
+            user.savedStories = [...savedArr, storyId];
+        }
+
+        await user.save();
+        res.json({ savedStories: user.savedStories });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET api/auth/saved
+// @desc    Get populated reading list
+router.get('/saved', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        const savedIds = (user.savedStories || []).map(id => id.toString());
+        
+        const Story = require('../models/Story');
+        const populated = await Story.find({ _id: { $in: savedIds } }).populate('author', 'name');
+        
+        const dummyMeta = {
+            'd000000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
+            'd000000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
+            'd000000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
+            'd000000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
+        };
+
+        const final = savedIds.map(id => {
+            const real = populated.find(s => s._id.toString() === id);
+            if (real) return real;
+            if (dummyMeta[id]) return { _id: id, ...dummyMeta[id], isDummy: true };
+            return { _id: id, title: 'Unknown Story', isDummy: true };
+        });
+
+        res.json(final);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

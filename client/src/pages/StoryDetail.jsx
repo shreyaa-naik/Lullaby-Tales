@@ -329,10 +329,12 @@ const StoryDetail = () => {
                                 <Sparkles className="w-4 h-4" style={{ color: '#D49E8D' }} />
                                 {loadingSummary ? 'Summarizing...' : 'View AI Summary'}
                             </button>
-                            <button 
-                                onClick={handleSaveToggle}
-                                className={`p-3 rounded-full border transition-all ${isSaved ? 'bg-[#D49E8D] text-white border-[#D49E8D]' : 'border-slate-100 hover:bg-slate-50 text-slate-400 hover:text-slate-900'}`}>
-                                {isSaved ? <BookmarkCheck className="w-5 h-5" /> : <Bookmark className="w-5 h-5" />}
+                            <button
+                                onClick={() => isSaved ? unsaveStory(id) : saveStory(id)}
+                                className={`p-3 rounded-full ${isSaved ? 'bg-amber-50 text-amber-500' : 'bg-white text-slate-400 group-hover:text-amber-500'} shadow-sm transition-all`}
+                                title={isSaved ? "Remove from Reading List" : "Save to Reading List"}
+                            >
+                                {isSaved ? <BookmarkCheck className="w-6 h-6 fill-current" /> : <Bookmark className="w-6 h-6" />}
                             </button>
                             <button className="p-3 rounded-full border border-slate-100 hover:bg-slate-50 text-slate-400 hover:text-slate-900 transition-all">
                                 <Share2 className="w-5 h-5" />
