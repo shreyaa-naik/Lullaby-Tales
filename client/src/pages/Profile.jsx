@@ -7,23 +7,27 @@ import toast from 'react-hot-toast';
 import API_BASE_URL from '../config';
 
 const Profile = () => {
-    const { user, savedStories } = useAuth();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState('stories');
 
     const [userStories, setUserStories] = useState([]);
     const [likedStoriesList, setLikedStoriesList] = useState([]);
+    const [readingList, setReadingList] = useState([]);
     const [loading, setLoading] = useState(true);
 
     React.useEffect(() => {
         const fetchUserData = async () => {
+            if (!user?.id) return;
+            
             try {
                 const token = localStorage.getItem('token');
                 
-                // Fetch User's Created Stories
-                const res = await fetch(`${API_BASE_URL}/api/stories`);
-                const allStories = await res.json();
-                const mine = allStories.filter(s => s.author?._id === user?.id || s.author === user?.id);
-                setUserStories(mine.map(s => ({
+                // 1. Fetch User's Created Stories (Drafts + Published)
+                const res = await fetch(`${API_BASE_URL}/api/stories/me`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const myStories = await res.json();
+                setUserStories(myStories.map(s => ({
                     id: s._id,
                     title: s.title,
                     authorName: s.author?.name || user?.name,
@@ -31,19 +35,19 @@ const Profile = () => {
                     likes: s.likes || 0,
                     averageRating: s.rating || 0,
                     tags: s.tags,
-                    image: s.image
+                    image: s.image,
+                    status: s.status
                 })));
 
-                // Fetch User's Liked Stories via Profile Endpoint
-                const profRes = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+                // 2. Fetch User's Private Reading List
+                const readRes = await fetch(`${API_BASE_URL}/api/auth/saved`, {
                     headers: { 'x-auth-token': token }
                 });
-                if (profRes.ok) {
-                    const profData = await profRes.json();
-                    if (profData && profData.likedStories) {
-                        setLikedStoriesList(profData.likedStories.map(s => ({
-                            id: s._id || s.id,
-                            title: s.title || 'Untitled Tale',
+                if (readRes.ok) {
+                    const readData = await readRes.json();
+                    setReadingList(readData.map(s => ({
+                        id: s._id || s.id,
+                        title: s.title,
                         authorName: s.author?.name || 'Author',
                         views: s.views || 0,
                         likes: s.likes || 0,
@@ -53,13 +57,33 @@ const Profile = () => {
                     })));
                 }
 
+                // 3. Fetch User's Liked Stories
+                const profRes = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+                    headers: { 'x-auth-token': token }
+                });
+                if (profRes.ok) {
+                    const profData = await profRes.json();
+                    if (profData && profData.likedStories) {
+                        setLikedStoriesList(profData.likedStories.map(s => ({
+                            id: s._id || s.id,
+                            title: s.title || 'Untitled Tale',
+                            authorName: s.author?.name || 'Author',
+                            views: s.views || 0,
+                            likes: s.likes || 0,
+                            averageRating: s.rating || 0,
+                            tags: s.tags,
+                            image: s.image
+                        })));
+                    }
+                }
+
             } catch (err) {
                 console.error("Failed to fetch profile data", err);
             } finally {
                 setLoading(false);
             }
         };
-        if (user) fetchUserData();
+        fetchUserData();
     }, [user]);
 
     const handleDelete = async (id) => {
@@ -182,8 +206,8 @@ const Profile = () => {
                 )}
 
                 {activeTab === 'bookmarks' && (
-                    savedStories && savedStories.length > 0 ? (
-                        savedStories.map((story, i) => (
+                    readingList.length > 0 ? (
+                        readingList.map((story, i) => (
                             <StoryCard key={story.id || story._id || i} story={story} />
                         ))
                     ) : (
