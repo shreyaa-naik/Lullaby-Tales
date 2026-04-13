@@ -156,11 +156,21 @@ router.put('/:id/like', auth, async (req, res) => {
             if (story) story.likes = (story.likes || 0) + 1;
         }
 
+        const dummyBases = {
+            'd00000000000000000000001': 124,
+            'd00000000000000000000002': 89,
+            'd00000000000000000000003': 245,
+            'd00000000000000000000004': 560
+        };
+
+        const totalLikes = story ? story.likes : 
+                          (dummyBases[req.params.id] + (!isLiked ? 1 : 0));
+
         await user.save();
         if (story) await story.save();
-        
+
         res.json({ 
-            likes: story ? story.likes : (isLiked ? 0 : 1), // Mock likes for dummy if needed
+            likes: totalLikes,
             isLiked: !isLiked 
         });
     } catch (err) {

@@ -86,10 +86,10 @@ router.get('/profile', auth, async (req, res) => {
         
         // Metadata for default stories so they show up in profile
         const dummyMeta = {
-            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' } },
-            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' } },
-            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' } },
-            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' } }
+            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
+            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
+            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
+            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
         };
 
         const finalLiked = likedIds.map(id => {
@@ -97,7 +97,15 @@ router.get('/profile', auth, async (req, res) => {
             if (real) return real;
             if (dummyMeta[id]) {
                 const dm = dummyMeta[id];
-                return { _id: id, title: dm.title, author: dm.author, isDummy: true };
+                return { 
+                    _id: id, 
+                    title: dm.title, 
+                    author: dm.author, 
+                    likes: dm.likes + 1, // Reflect the user's like
+                    views: dm.views,
+                    tags: dm.tags,
+                    isDummy: true 
+                };
             }
             return null;
         }).filter(item => item !== null);
