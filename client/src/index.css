@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Colour tokens ───────────────────────────────────────── */
+:root {
+  --bg:         #FAF6F2;   /* off-white */
+  --bg-soft:    #DED1BD;   /* warm sand */
+  --nav:        #FAF6F2;   /* navbar matches bg but we use border */
+  --brand:      #D49E8D;   /* light dusty rose */
+  --brand-dark: #C76A55;   /* darker rose hover */
+  --text-head:  #683B2B;   /* dark chocolate brown */
+  --text-body:  #82574A;   /* slightly lighter brown */
+  --border:     #D49E8D;   /* dusty rose border */
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: var(--bg);
+    background-image: url('/user_bg.png'); /* Full website user background */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: var(--text-body);
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    color: var(--text-head);
+  }
+}
+
+@layer components {
+  /* ── Buttons ─────────────────────────────────────── */
+  .btn {
+    @apply inline-flex items-center justify-center font-bold rounded-2xl transition-all duration-300 cursor-pointer;
+  }
+
+  button, a[href] {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease !important;
+  }
+  
+  button:active, a[href]:active {
+    transform: scale(0.95) !important;
+  }
+
+  .btn-primary {
+    background-color: var(--brand);
+    color: #FAF6F2;
+    @apply px-8 py-3 shadow-lg;
+  }
+  .btn-primary:hover {
+    background-color: var(--brand-dark);
+    @apply shadow-xl scale-[1.02];
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: var(--text-head);
+    border: 1.5px solid var(--text-head);
+    @apply px-8 py-3;
+  }
+  .btn-secondary:hover {
+    background-color: var(--text-head);
+    color: #FAF6F2;
+  }
+
+  /* ── Inputs ──────────────────────────────────────── */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-2xl font-medium transition-all duration-200;
+    background-color: rgba(250, 246, 242, 0.8);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid var(--border);
+    color: var(--text-head);
+  }
+  .input-field::placeholder {
+    color: rgba(104, 59, 43, 0.4);
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(212, 158, 141, 0.2);
+  }
+
+  /* ── Glass card ──────────────────────────────────── */
+  .glass {
+    background: rgba(250, 246, 242, 0.7);
+    backdrop-filter: blur(16px);
+    border: 1.5px solid var(--bg-soft);
+    box-shadow: 0 8px 32px rgba(104, 59, 43, 0.1);
+  }
+
+  /* ── Text gradient ───────────────────────────────── */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--brand), var(--text-head));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* ── Selection ───────────────────────────────── */
+::selection {
+  background-color: var(--bg-soft);
+  color: var(--text-head);
+}
+
+/* ── Float animation ─────────────────────────── */
+@keyframes float {
+  0%   { transform: translateY(0px); }
+  50%  { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+.animate-float { animation: float 6s ease-in-out infinite; }

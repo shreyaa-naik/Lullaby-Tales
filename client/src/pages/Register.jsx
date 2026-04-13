@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { BookOpen, User, Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
+
+const BG       = 'transparent';
+const BRAND    = '#D49E8D';
+const BRAND_DK = '#C76A55';
+const TEXT_H   = '#683B2B';
+const TEXT_B   = '#82574A';
+const BORDER   = 'rgba(104,59,43,0.1)';
+const ICON_C   = '#D49E8D';
+const WHITE_OP = 'rgba(250, 246, 242, 0.85)';
+
+const Field = ({ label, icon: Icon, ...props }) => (
+    <div>
+        <label className="block text-sm font-bold mb-2" style={{ color: TEXT_H }}>{label}</label>
+        <div className="relative">
+            <Icon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: ICON_C }} />
+            <input className="input-field pl-12 bg-white/50" {...props} />
+        </div>
+    </div>
+);
+
+const Register = () => {
+    const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+    const { login }  = useAuth();
+    const navigate   = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (formData.password.length < 6) {
+            toast.error('Password must be at least 6 characters');
+            return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            toast.error('Passwords do not match');
+            return;
+        }
+        
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password })
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+                toast.success('Account created magically!');
+                login(data.user, data.token);
+                navigate('/feed');
+            } else {
+                toast.error(data.msg || 'Registration failed');
+            }
+        } catch (err) {
+            toast.error('Server connection error. Is backend running?');
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: BG }}>
+            <div className="max-w-md w-full">
+
+                <div className="text-center mb-10">
+                    <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
+                        <div className="p-2.5 rounded-xl shadow-md" style={{ backgroundColor: BRAND }}>
+                            <BookOpen className="w-5 h-5 text-[#FAF6F2]" />
+                        </div>
+                        <span className="text-xl font-display font-black tracking-tight" style={{ color: TEXT_H }}>
+                            Lullaby<span style={{ color: BRAND }}>Tales</span>
+                        </span>
+                    </Link>
+                    <h2 className="text-3xl font-display font-black" style={{ color: TEXT_H }}>Create your account</h2>
+                    <p className="mt-2 font-medium" style={{ color: TEXT_B }}>Join our community of storytellers today.</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-8 rounded-3xl space-y-5 backdrop-blur-md"
+                      style={{ backgroundColor: WHITE_OP, border: `1.5px solid ${BORDER}`, boxShadow: '0 8px 40px rgba(104,59,43,0.09)' }}>
+
+                    <Field label="Full Name"        icon={User}        type="text"     required placeholder="Jane Doe"
+                           value={formData.name}            onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                    <Field label="Email address"    icon={Mail}        type="email"    required placeholder="name@example.com"
+                           value={formData.email}           onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                    <Field label="Password"         icon={Lock}        type="password" required placeholder="••••••••" minLength="6"
+                           value={formData.password}        onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    <Field label="Confirm Password" icon={ShieldCheck} type="password" required placeholder="••••••••" minLength="6"
+                           value={formData.confirmPassword} onChange={e => setFormData({ ...formData, confirmPassword: e.target.value })} />
+
+                    <button type="submit"
+                        className="w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 font-black text-base text-[#FAF6F2] transition-all duration-200 group mt-2"
+                        style={{ backgroundColor: BRAND, boxShadow: '0 4px 20px rgba(212,158,141,0.22)' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = BRAND_DK}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = BRAND}
+                    >
+                        Get Started <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                </form>
+
+                <p className="text-center mt-8 font-medium" style={{ color: TEXT_B }}>
+                    Already have an account?{' '}
+                    <Link to="/login" className="font-black hover:underline" style={{ color: BRAND }}>Sign in instead</Link>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+export default Register;
