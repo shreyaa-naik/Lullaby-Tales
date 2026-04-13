@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Heart, Star, MessageCircle, Sparkles, User, Calendar, ArrowLeft, Bookmark, BookmarkCheck, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -97,34 +97,34 @@ const StoryDetail = () => {
 
     useEffect(() => {
         const fetchStoryAndComments = async () => {
-            if (dummyData[id]) {
-                setStory(dummyData[id]);
-                // We keep going to fetch comments from DB even for dummy stories
-            }
+            const token = localStorage.getItem('token');
 
             try {
-                const token = localStorage.getItem('token');
-                const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
-                    headers: { 'x-auth-token': token || '' }
-                });
-                const found = await res.json();
-                
-                if (res.ok && found && found.title) {
-                    setStory({
-                        title: found.title,
-                        content: found.content || '',
-                        authorName: found.author?.name || 'Grand Storyteller',
-                        tags: found.tags || [],
-                        likes: found.likes || 0,
-                        views: found.views || 0,
-                        averageRating: found.rating || 0,
-                        createdAt: found.createdAt || new Date(),
-                    });
-                    setLiked(!!found.isLiked);
+                // 1. Handle Story Data
+                if (dummyData[id]) {
+                    setStory(dummyData[id]);
                 } else {
-                    toast.error("Story not found.");
+                    const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
+                        headers: { 'x-auth-token': token || '' }
+                    });
+                    const found = await res.json();
+                    
+                    if (res.ok && found && found.title) {
+                        setStory({
+                            title: found.title,
+                            content: found.content || '',
+                            authorName: found.author?.name || 'Grand Storyteller',
+                            tags: found.tags || [],
+                            likes: found.likes || 0,
+                            views: found.views || 0,
+                            averageRating: found.rating || 0,
+                            createdAt: found.createdAt || new Date(),
+                        });
+                        setLiked(!!found.isLiked);
+                    }
                 }
 
+                // 2. Always Handle Comments Data
                 const commRes = await fetch(`${API_BASE_URL}/api/comments/${id}`);
                 if (commRes.ok) {
                     const commData = await commRes.json();
