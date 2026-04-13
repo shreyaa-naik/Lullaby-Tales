@@ -73,13 +73,17 @@ router.get('/users', async (req, res) => {
 // @desc    Get user profile (including liked stories)
 router.get('/profile', auth, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id)
-            .select('-password')
-            .populate({
-                path: 'likedStories',
-                populate: { path: 'author', select: 'name' }
-            });
-        res.json(user);
+        const user = await User.findById(req.user.id).select('-password');
+        
+        // Manually populate liked stories since they are now strings
+        const Story = require('../models/Story');
+        const likedIds = user.likedStories || [];
+        const populatedLiked = await Story.find({ _id: { $in: likedIds } }).populate('author', 'name');
+        
+        const userObj = user.toObject();
+        userObj.likedStories = populatedLiked;
+        
+        res.json(userObj);
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ msg: 'Server Error' });

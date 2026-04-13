@@ -173,8 +173,35 @@ const StoryDetail = () => {
         setPosting(false);
     };
 
-    if (loading) return <div className="pt-40 text-center font-black" style={{ color: '#D49E8D' }}>Opening the book...</div>;
-    if (!story) return <div className="pt-40 text-center font-black" style={{ color: '#683B2B' }}>Story not found.</div>;
+    if (loading) return (
+        <div className="pt-60 flex flex-col items-center justify-center min-h-[60vh]">
+            <div className="relative w-20 h-20 mb-8 animate-pulse">
+                <div 
+                    className="absolute inset-0 rounded-3xl opacity-20 animate-ping"
+                    style={{ backgroundColor: '#D49E8D' }}
+                ></div>
+                <div 
+                    className="relative w-full h-full rounded-2xl flex items-center justify-center shadow-2xl"
+                    style={{ backgroundColor: '#FAF6F2', border: '2px solid #D49E8D' }}
+                >
+                    <BookOpen className="w-10 h-10" style={{ color: '#D49E8D' }} />
+                </div>
+            </div>
+            <p className="text-xl font-display font-black tracking-tight animate-bounce" style={{ color: '#683B2B' }}>
+                Opening the book...
+            </p>
+        </div>
+    );
+
+    if (!story) return (
+        <div className="pt-60 flex flex-col items-center justify-center text-center px-4">
+            <h2 className="text-4xl font-display font-black mb-4 tracking-tight" style={{ color: '#683B2B' }}>Tale not found.</h2>
+            <p className="text-slate-500 mb-10 font-medium text-lg max-w-md">This book seems to have disappeared from our archives or never existed in this realm.</p>
+            <Link to="/feed" className="px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white transition-all shadow-xl hover:scale-105 active:scale-95" style={{ backgroundColor: '#D49E8D' }}>
+                Back to Library
+            </Link>
+        </div>
+    );
 
     const handleRating = async (r) => {
         if (!user) return toast.error('Please sign in to rate');

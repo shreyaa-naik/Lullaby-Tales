@@ -15,8 +15,7 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     likedStories: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Story'
+        type: String // Changed to String to support both real and dummy stories
     }],
     bio: {
         type: String,
