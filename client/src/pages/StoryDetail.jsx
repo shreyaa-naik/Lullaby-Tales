@@ -99,8 +99,7 @@ const StoryDetail = () => {
         const fetchStoryAndComments = async () => {
             if (dummyData[id]) {
                 setStory(dummyData[id]);
-                setLoading(false);
-                return;
+                // We keep going to fetch comments from DB even for dummy stories
             }
 
             try {

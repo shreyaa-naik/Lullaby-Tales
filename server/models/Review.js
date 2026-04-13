@@ -7,8 +7,7 @@ const ReviewSchema = new mongoose.Schema({
         required: true
     },
     story: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Story',
+        type: String, // Allowing String so dummy/default stories can also be reviewed
         required: true
     },
     comment: {

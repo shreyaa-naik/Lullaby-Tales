@@ -7,8 +7,7 @@ const RatingSchema = new mongoose.Schema({
         required: true
     },
     story: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Story',
+        type: String, // String to support both real and dummy stories
         required: true
     },
     rating: {
