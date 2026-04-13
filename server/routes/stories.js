@@ -6,10 +6,10 @@ const Story = require('../models/Story');
 const User = require('../models/User');
 
 // @route   GET api/stories
-// @desc    Get all stories
+// @desc    Get all published stories
 router.get('/', async (req, res) => {
     try {
-        const stories = await Story.find().populate('author', ['name']).sort({ createdAt: -1 });
+        const stories = await Story.find({ status: 'Published' }).populate('author', ['name']).sort({ createdAt: -1 });
         res.json(stories);
     } catch (err) {
         console.error(err.message);
@@ -127,7 +127,17 @@ router.put('/:id', auth, async (req, res) => {
     }
 });
 
-// @route   DELETE api/stories/:id
+// @route   GET api/stories/me
+// @desc    Get current user's stories (Drafts + Published)
+router.get('/me', auth, async (req, res) => {
+    try {
+        const stories = await Story.find({ author: req.user.id }).sort({ createdAt: -1 });
+        res.json(stories);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 // @desc    Delete a story
 router.delete('/:id', auth, async (req, res) => {
     try {

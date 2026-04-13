@@ -11,12 +11,12 @@ const Dashboard = () => {
 
     const fetchStories = async () => {
         try {
-            const res = await fetch(`${API_BASE_URL}/api/stories`);
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/stories/me`, {
+                headers: { 'x-auth-token': token }
+            });
             const data = await res.json();
-            if (user) {
-                // Filter backend story response by exactly the logged in user
-                setUserStories(data.filter(s => s.author && s.author._id === user.id));
-            }
+            setUserStories(data);
         } catch(e) { console.error(e); }
     };
 
