@@ -78,11 +78,10 @@ router.get('/users', async (req, res) => {
 router.get('/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
-        console.log("Profile Fetch - User Liked IDs in DB:", user.likedStories);
+        const likedIds = (user.likedStories || []).map(id => id.toString());
         
         // Manually populate liked stories
         const Story = require('../models/Story');
-        const likedIds = user.likedStories || [];
         const populatedLiked = await Story.find({ _id: { $in: likedIds } }).populate('author', 'name');
         
         // Metadata for default stories so they show up in profile

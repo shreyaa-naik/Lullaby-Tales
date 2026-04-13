@@ -160,17 +160,17 @@ router.put('/:id/like', auth, async (req, res) => {
         }
         
         const user = await User.findById(req.user.id);
-        console.log("Current User Liked Stories:", user.likedStories);
-        const isLiked = user.likedStories.includes(req.params.id);
-        console.log("Is Story Liked already?", isLiked);
+        // Force all IDs to strings for bulletproof comparison
+        const likedStoriesArr = (user.likedStories || []).map(s => s.toString());
+        const isLiked = likedStoriesArr.includes(req.params.id);
 
         if (isLiked) {
-            // Unlike
-            user.likedStories = user.likedStories.filter(id => id.toString() !== req.params.id);
+            // Unlike: Remove the ID
+            user.likedStories = likedStoriesArr.filter(id => id !== req.params.id);
             if (story) story.likes = Math.max(0, (story.likes || 1) - 1);
         } else {
-            // Like
-            user.likedStories.push(req.params.id);
+            // Like: Add the ID
+            user.likedStories = [...likedStoriesArr, req.params.id];
             if (story) story.likes = (story.likes || 0) + 1;
         }
 
