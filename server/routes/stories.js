@@ -152,12 +152,29 @@ router.delete('/:id', auth, async (req, res) => {
 router.put('/:id/like', auth, async (req, res) => {
     try {
         const isDummy = req.params.id.startsWith('d000');
-        let story = null;
+        let story = await Story.findById(req.params.id);
         
-        if (!isDummy) {
-            story = await Story.findById(req.params.id);
-            if (!story) return res.status(404).json({ msg: 'Story not found' });
+        if (!story && isDummy) {
+            const dummyBases = {
+                'd000000000000000000000001': { title: 'The Midnight Star', likes: 124, content: "Leo was a collector of forgotten things...", authorName: 'Luna Lovegood' },
+                'd000000000000000000000002': { title: 'Echoes of the Forest', likes: 89, content: "In the heart of the Emerald Woods...", authorName: 'Caspian Thorne' },
+                'd000000000000000000000003': { title: 'Clockwork Dreams', likes: 245, content: "The city of Oakhaven breathed smoke...", authorName: 'Arthur Gears' },
+                'd000000000000000000000004': { title: 'The Last Alchemist', likes: 560, content: "Nicholas stood before the golden crucible...", authorName: 'Julian Thorne' }
+            };
+            const base = dummyBases[req.params.id];
+            if (base) {
+                story = new Story({
+                    _id: req.params.id,
+                    title: base.title,
+                    content: base.content,
+                    likes: base.likes,
+                    author: req.user.id,
+                    isDummy: true
+                });
+            }
         }
+        
+        if (!isDummy && !story) return res.status(404).json({ msg: 'Story not found' });
         
         const user = await User.findById(req.user.id);
         // Force all IDs to strings for bulletproof comparison
@@ -174,22 +191,13 @@ router.put('/:id/like', auth, async (req, res) => {
             if (story) story.likes = (story.likes || 0) + 1;
         }
 
-        const dummyBases = {
-            'd000000000000000000000001': 124,
-            'd000000000000000000000002': 89,
-            'd000000000000000000000003': 245,
-            'd000000000000000000000004': 560
-        };
-
-        const totalLikes = story ? story.likes : 
-                          (dummyBases[req.params.id] + (!isLiked ? 1 : 0));
 
         console.log("Saving user with likedStories:", user.likedStories);
         await user.save();
         if (story) await story.save();
 
         res.json({ 
-            likes: totalLikes,
+            likes: story ? story.likes : 0, 
             isLiked: !isLiked 
         });
     } catch (err) {
