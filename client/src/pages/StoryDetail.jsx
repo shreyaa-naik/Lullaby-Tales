@@ -100,28 +100,28 @@ const StoryDetail = () => {
             const token = localStorage.getItem('token');
 
             try {
-                // 1. Handle Story Data
-                if (dummyData[id]) {
-                    setStory(dummyData[id]);
-                } else {
-                    const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
-                        headers: { 'x-auth-token': token || '' }
+                // Always fetch from API first to get real liked-status and community counts
+                const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
+                    headers: { 'x-auth-token': token || '' }
+                });
+                const found = await res.json();
+                
+                if (res.ok && found) {
+                    // Hybrid logic: Use dummy content for text but LIVE counts/likes from server
+                    const isDummy = id.startsWith('d000');
+                    const baseStory = isDummy ? dummyData[id] : null;
+
+                    setStory({
+                        title: found.title || baseStory?.title,
+                        content: (isDummy ? baseStory?.content : found.content) || '',
+                        authorName: found.author?.name || baseStory?.authorName || 'Grand Storyteller',
+                        tags: found.tags || baseStory?.tags || [],
+                        likes: found.likes ?? 0,
+                        views: found.views ?? 0,
+                        averageRating: found.rating ?? 0,
+                        createdAt: found.createdAt || new Date(),
                     });
-                    const found = await res.json();
-                    
-                    if (res.ok && found && found.title) {
-                        setStory({
-                            title: found.title,
-                            content: found.content || '',
-                            authorName: found.author?.name || 'Grand Storyteller',
-                            tags: found.tags || [],
-                            likes: found.likes || 0,
-                            views: found.views || 0,
-                            averageRating: found.rating || 0,
-                            createdAt: found.createdAt || new Date(),
-                        });
-                        setLiked(!!found.isLiked);
-                    }
+                    setLiked(!!found.isLiked);
                 }
 
                 // 2. Always Handle Comments Data
@@ -132,7 +132,7 @@ const StoryDetail = () => {
                 }
             } catch (err) {
                 console.error(err);
-                toast.error("Failed to load data");
+                if (!id.startsWith('d000')) toast.error("Failed to load data");
             } finally {
                 setLoading(false);
             }

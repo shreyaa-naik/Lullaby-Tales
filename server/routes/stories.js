@@ -21,25 +21,40 @@ router.get('/', async (req, res) => {
 // @desc    Get story by ID (Increment views + check if liked)
 router.get('/:id', async (req, res) => {
     try {
+        const id = req.params.id;
+        const isDummy = id.startsWith('d000');
         const token = req.header('x-auth-token');
         let isLiked = false;
 
         if (token) {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                const user = await User.findById(decoded.user.id).select('-password');
-                console.log("Profile Fetch - User Liked IDs:", user.likedStories);
-                
+                const user = await User.findById(decoded.user.id);
                 if (user && user.likedStories) {
-                    isLiked = user.likedStories.some(sid => sid.toString() === req.params.id);
+                    isLiked = user.likedStories.includes(id);
                 }
-            } catch (err) {
-                // Token invalid, ignore
-            }
+            } catch (err) {}
+        }
+
+        if (isDummy) {
+            const dummyBases = {
+                'd00000000000000000000001': { title: 'The Midnight Star', likes: 124 },
+                'd00000000000000000000002': { title: 'Echoes of the Forest', likes: 89 },
+                'd00000000000000000000003': { title: 'Clockwork Dreams', likes: 245 },
+                'd00000000000000000000004': { title: 'The Last Alchemist', likes: 560 }
+            };
+            const dm = dummyBases[id] || { title: 'Unknown', likes: 0 };
+            return res.json({
+                _id: id,
+                title: dm.title,
+                likes: dm.likes + (isLiked ? 1 : 0),
+                isLiked,
+                isDummy: true
+            });
         }
 
         const story = await Story.findByIdAndUpdate(
-            req.params.id, 
+            id, 
             { $inc: { views: 1 } }, 
             { new: true }
         ).populate('author', ['name']);
@@ -48,7 +63,6 @@ router.get('/:id', async (req, res) => {
         
         const storyObj = story.toObject();
         storyObj.isLiked = isLiked;
-        
         res.json(storyObj);
     } catch (err) {
         console.error(err.message);
