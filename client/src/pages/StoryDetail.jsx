@@ -237,7 +237,8 @@ const StoryDetail = () => {
         
         // Optimistic UI update: Turn red and change number instantly (like Instagram)
         const willBeLiked = !liked;
-        const newLikesCount = willBeLiked ? (story.likes + 1) : Math.max(0, story.likes - 1);
+        const currentLikes = Number(story.likes) || 0;
+        const newLikesCount = willBeLiked ? (currentLikes + 1) : Math.max(0, currentLikes - 1);
         
         setLiked(willBeLiked);
         setStory({ ...story, likes: newLikesCount });

@@ -78,6 +78,7 @@ router.get('/users', async (req, res) => {
 router.get('/profile', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
+        console.log("Profile Fetch - User Liked IDs in DB:", user.likedStories);
         
         // Manually populate liked stories
         const Story = require('../models/Story');

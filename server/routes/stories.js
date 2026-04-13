@@ -27,7 +27,9 @@ router.get('/:id', async (req, res) => {
         if (token) {
             try {
                 const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                const user = await User.findById(decoded.user.id);
+                const user = await User.findById(decoded.user.id).select('-password');
+                console.log("Profile Fetch - User Liked IDs:", user.likedStories);
+                
                 if (user && user.likedStories) {
                     isLiked = user.likedStories.some(sid => sid.toString() === req.params.id);
                 }
@@ -144,7 +146,9 @@ router.put('/:id/like', auth, async (req, res) => {
         }
         
         const user = await User.findById(req.user.id);
-        const isLiked = user.likedStories.some(sid => sid.toString() === req.params.id);
+        console.log("Current User Liked Stories:", user.likedStories);
+        const isLiked = user.likedStories.includes(req.params.id);
+        console.log("Is Story Liked already?", isLiked);
 
         if (isLiked) {
             // Unlike
@@ -166,6 +170,7 @@ router.put('/:id/like', auth, async (req, res) => {
         const totalLikes = story ? story.likes : 
                           (dummyBases[req.params.id] + (!isLiked ? 1 : 0));
 
+        console.log("Saving user with likedStories:", user.likedStories);
         await user.save();
         if (story) await story.save();
 

@@ -14,9 +14,7 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    likedStories: [{
-        type: String // Changed to String to support both real and dummy stories
-    }],
+    likedStories: [String], // Simple array of strings for all story IDs
     bio: {
         type: String,
         default: ""
