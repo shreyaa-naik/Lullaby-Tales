@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Heart, Star, MessageCircle, Sparkles, User, Calendar, ArrowLeft, Bookmark, BookmarkCheck, Share2 } from 'lucide-react';
+import { Heart, Star, MessageCircle, Sparkles, User, Calendar, ArrowLeft, Bookmark, BookmarkCheck, Share2, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import API_BASE_URL from '../config';
