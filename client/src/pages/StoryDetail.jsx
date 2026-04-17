@@ -20,6 +20,7 @@ const StoryDetail = () => {
     const [posting, setPosting] = useState(false);
     const [summaryText, setSummaryText] = useState('');
     const [loadingSummary, setLoadingSummary] = useState(false);
+    const [error, setError] = useState(null);
 
     const dummyData = {
         'd00000000000000000000001': {
@@ -103,9 +104,9 @@ const StoryDetail = () => {
                 const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
                     headers: { 'x-auth-token': token || '' }
                 });
-                const found = await res.json();
                 
-                if (res.ok && found) {
+                if (res.ok) {
+                    const found = await res.json();
                     // Hybrid logic: Use dummy content for text but LIVE counts/likes from server
                     const isDummy = id.startsWith('d000');
                     const baseStory = isDummy ? dummyData[id] : null;
@@ -121,6 +122,14 @@ const StoryDetail = () => {
                         createdAt: found.createdAt || new Date(),
                     });
                     setLiked(!!found.isLiked);
+                } else {
+                    // Fallback for dummy stories if backend is unreachable or returns error
+                    const isDummy = id?.startsWith('d000');
+                    if (isDummy && dummyData[id]) {
+                        setStory(dummyData[id]);
+                    } else {
+                        setError('Tale not found');
+                    }
                 }
 
                 // 2. Always Handle Comments Data
@@ -131,13 +140,18 @@ const StoryDetail = () => {
                 }
             } catch (err) {
                 console.error(err);
-                if (!id.startsWith('d000')) toast.error("Failed to load data");
+                const isDummy = id?.startsWith('d000');
+                if (isDummy && dummyData[id]) {
+                    setStory(dummyData[id]);
+                } else {
+                    setError('Server error connecting to library');
+                }
             } finally {
                 setLoading(false);
             }
         };
         fetchStoryAndComments();
-    }, [id]);
+    }, [id, user]);
 
     const handlePostComment = async () => {
         if (!user) return toast.error("Please login to comment");
@@ -192,11 +206,21 @@ const StoryDetail = () => {
         </div>
     );
 
+    if (error) return (
+        <div className="pt-60 flex flex-col items-center justify-center text-center px-4">
+            <h2 className="text-4xl font-display font-black mb-4 tracking-tight" style={{ color: '#683B2B' }}>{error}</h2>
+            <p className="text-slate-500 mb-10 font-medium text-lg max-w-md">This book seems to have disappeared from our archives or the library is currently out of reach.</p>
+            <Link to="/trending" className="px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white transition-all shadow-xl hover:scale-105 active:scale-95" style={{ backgroundColor: '#D49E8D' }}>
+                Back to Library
+            </Link>
+        </div>
+    );
+
     if (!story) return (
         <div className="pt-60 flex flex-col items-center justify-center text-center px-4">
             <h2 className="text-4xl font-display font-black mb-4 tracking-tight" style={{ color: '#683B2B' }}>Tale not found.</h2>
             <p className="text-slate-500 mb-10 font-medium text-lg max-w-md">This book seems to have disappeared from our archives or never existed in this realm.</p>
-            <Link to="/feed" className="px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white transition-all shadow-xl hover:scale-105 active:scale-95" style={{ backgroundColor: '#D49E8D' }}>
+            <Link to="/trending" className="px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-white transition-all shadow-xl hover:scale-105 active:scale-95" style={{ backgroundColor: '#D49E8D' }}>
                 Back to Library
             </Link>
         </div>

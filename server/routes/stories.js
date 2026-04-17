@@ -36,7 +36,9 @@ router.get('/:id', async (req, res) => {
             } catch (err) {}
         }
 
-        if (!story && isDummy) {
+        const mongoose = require('mongoose');
+        
+        if (isDummy) {
             const dummyBases = {
                 'd00000000000000000000001': { title: 'The Midnight Star', likes: 124 },
                 'd00000000000000000000002': { title: 'Echoes of the Forest', likes: 89 },
@@ -51,6 +53,10 @@ router.get('/:id', async (req, res) => {
                 isLiked,
                 isDummy: true
             });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(404).json({ msg: 'Tale not found (Invalid ID)' });
         }
 
         const story = await Story.findByIdAndUpdate(
