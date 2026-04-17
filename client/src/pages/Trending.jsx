@@ -1,7 +1,28 @@
-import React from 'react';
-import { TrendingUp, Flame, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Flame, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 const Trending = () => {
+    const [stories, setStories] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchTrending = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/stories/trending`);
+                if (res.ok) {
+                    setStories(await res.json());
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTrending();
+    }, []);
+
     return (
         <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto min-h-screen">
             <div className="text-center mb-16">
@@ -13,26 +34,34 @@ const Trending = () => {
             </div>
 
             <div className="space-y-6">
-                {[
-                    { title: "The Painted Moon", author: "Elara Vance", reads: "24.5k", rank: 1 },
-                    { title: "Whispers of the Deep", author: "Marcus Thorne", reads: "18.2k", rank: 2 },
-                    { title: "A Clockwork Heart", author: "Sylvia Wren", reads: "15.9k", rank: 3 },
-                    { title: "Beyond the Velvet Veil", author: "Julian Ash", reads: "12.4k", rank: 4 }
-                ].map((tale) => (
-                    <div key={tale.rank} className="p-8 rounded-[2rem] flex items-center justify-between transition-transform hover:-translate-y-1 cursor-pointer backdrop-blur-md"
-                         style={{ backgroundColor: 'rgba(250, 246, 242, 0.8)', border: '1px solid rgba(104, 59, 43, 0.1)', boxShadow: '0 8px 32px rgba(104, 59, 43, 0.05)' }}>
-                        <div className="flex items-center gap-6">
-                            <span className="text-4xl font-display font-black" style={{ color: '#D49E8D', opacity: 0.5 }}>#0{tale.rank}</span>
-                            <div>
-                                <h3 className="text-2xl font-bold mb-1" style={{ color: '#683B2B' }}>{tale.title}</h3>
-                                <p className="text-sm font-medium uppercase tracking-widest" style={{ color: '#82574A' }}>By {tale.author}</p>
+                {!loading ? (
+                    stories.map((tale, idx) => (
+                        <Link 
+                            to={`/story/${tale._id}`} 
+                            key={tale._id} 
+                            className="p-8 rounded-[2rem] flex items-center justify-between transition-all hover:scale-[1.01] group backdrop-blur-md"
+                            style={{ backgroundColor: 'rgba(250, 246, 242, 0.8)', border: '1px solid rgba(104, 59, 43, 0.1)', boxShadow: '0 8px 32px rgba(104, 59, 43, 0.05)' }}
+                        >
+                            <div className="flex items-center gap-6">
+                                <span className="text-4xl font-display font-black group-hover:text-[#D49E8D] transition-colors" style={{ color: 'rgba(212, 158, 141, 0.3)' }}>
+                                    #{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                                </span>
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-1" style={{ color: '#683B2B' }}>{tale.title}</h3>
+                                    <p className="text-sm font-medium uppercase tracking-widest" style={{ color: '#82574A' }}>By {tale.author?.name}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2 font-bold px-4 py-2 rounded-xl" style={{ backgroundColor: '#FAF6F2', color: '#C76A55' }}>
-                            <Flame className="w-4 h-4" /> {tale.reads} hits
-                        </div>
-                    </div>
-                ))}
+                            <div className="flex items-center gap-6">
+                                <div className="hidden md:flex items-center gap-2 font-bold px-4 py-2 rounded-xl" style={{ backgroundColor: '#FAF6F2', color: '#C76A55' }}>
+                                    <Flame className="w-4 h-4" /> {tale.likes} likes
+                                </div>
+                                <ChevronRight className="w-6 h-6 text-[#D49E8D] opacity-0 group-hover:opacity-100 transition-all" />
+                            </div>
+                        </Link>
+                    ))
+                ) : (
+                    <div className="text-center py-20 text-[#82574A] font-bold animate-pulse">Consulting the star charts...</div>
+                )}
             </div>
         </div>
     );

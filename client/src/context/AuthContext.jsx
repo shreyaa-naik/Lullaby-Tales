@@ -7,13 +7,12 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [savedStories, setSavedStories] = useState([]);
+    const [notifications, setNotifications] = useState([]);
 
     useEffect(() => {
         const checkAuth = async () => {
             const token = localStorage.getItem('token');
-            const savedUser = localStorage.getItem('user');
-
-            if (token && savedUser) {
+            if (token) {
                 try {
                     const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
                         headers: { 'x-auth-token': token }
@@ -21,8 +20,9 @@ export const AuthProvider = ({ children }) => {
                     
                     if (res.ok) {
                         const data = await res.json();
-                        setUser(data.user);
-                        setSavedStories(data.user.savedStories || []);
+                        setUser(data);
+                        setSavedStories(data.savedStories || []);
+                        fetchNotifications();
                     } else if (res.status === 401) {
                         logout();
                     }
@@ -35,19 +35,33 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, []);
 
+    const fetchNotifications = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/auth/notifications`, {
+                headers: { 'x-auth-token': token }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setNotifications(data);
+            }
+        } catch (err) {}
+    };
+
     const login = (userData, token) => {
         setUser(userData);
-        setSavedStories(userData.savedStories || []);
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
+        fetchNotifications();
     };
 
     const logout = () => {
         setUser(null);
         setSavedStories([]);
+        setNotifications([]);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        localStorage.removeItem('savedStories');
     };
 
     const saveStory = async (storyId) => {
@@ -55,13 +69,17 @@ export const AuthProvider = ({ children }) => {
         if (!token) return;
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/auth/save/${storyId}`, {
-                method: 'PUT',
+            const res = await fetch(`${API_BASE_URL}/api/stories/${storyId}/save`, {
+                method: 'POST',
                 headers: { 'x-auth-token': token }
             });
             if (res.ok) {
-                const data = await res.json();
-                setSavedStories(data.savedStories);
+                // Refresh local saved list
+                const savedRes = await fetch(`${API_BASE_URL}/api/auth/saved`, {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await savedRes.json();
+                setSavedStories(data);
             }
         } catch (err) {
             console.error("Save failed", err);
@@ -69,12 +87,15 @@ export const AuthProvider = ({ children }) => {
     };
 
     const unsaveStory = async (storyId) => {
-        // Same as saveStory because it's a toggle
         await saveStory(storyId);
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, savedStories, saveStory, unsaveStory }}>
+        <AuthContext.Provider value={{ 
+            user, loading, login, logout, 
+            savedStories, saveStory, unsaveStory, 
+            notifications, fetchNotifications 
+        }}>
             {children}
         </AuthContext.Provider>
     );

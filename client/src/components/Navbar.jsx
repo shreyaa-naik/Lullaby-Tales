@@ -72,6 +72,13 @@ const Navbar = () => {
 
                     {user ? (
                         <div className="flex items-center gap-6">
+                            <Link to="/notifications" className="relative p-2 rounded-xl transition-all hover:bg-white/50" style={{ color: NAV_TEXT_H }}>
+                                <Bell className="w-5 h-5" />
+                                {notifications?.length > 0 && (
+                                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                                )}
+                            </Link>
+
                             <Link to="/dashboard"
                                 className="text-[11px] font-black uppercase tracking-widest transition-colors"
                                 style={{ color: NAV_TEXT_B }}

@@ -5,16 +5,17 @@ const mongoose = require('mongoose');
 const auth = require('../middleware/auth');
 const Story = require('../models/Story');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 
 // Helper to format story response exactly as requested by the frontend
 const formatStory = (story, isLiked = false) => {
     if (!story) return null;
     return {
-        _id: story._id || story.id,
+        _id: story._id,
         title: story.title,
         content: story.content,
         author: { 
-            _id: story.author?._id || null,
+            _id: story.author?._id || story.author,
             name: story.author?.name || 'Grand Storyteller' 
         },
         likes: story.likes || 0,
@@ -28,7 +29,7 @@ const formatStory = (story, isLiked = false) => {
 };
 
 // @route   GET api/stories
-// @desc    Get all published stories
+// @desc    Global Feed - Return all stories
 router.get('/', async (req, res) => {
     try {
         const stories = await Story.find({ status: 'Published' })
@@ -42,71 +43,44 @@ router.get('/', async (req, res) => {
     }
 });
 
-// @route   GET api/stories/me
-// @desc    Get current user's stories
-router.get('/me', auth, async (req, res) => {
+// @route   GET api/stories/trending
+// @desc    Return high-engagement stories
+router.get('/trending', async (req, res) => {
     try {
-        // FILTER: Only returns stories where author matches logged-in user id
-        const myStories = await Story.find({ author: req.user.id })
+        const stories = await Story.find({ status: 'Published' })
             .populate('author', ['name'])
-            .sort({ createdAt: -1 });
-        
-        res.json(myStories.map(s => formatStory(s)));
+            .sort({ likes: -1, views: -1 })
+            .limit(10);
+        res.json(stories.map(s => formatStory(s)));
     } catch (err) {
-        console.error("Fetch My Stories Error:", err.message);
         res.status(500).send('Server Error');
     }
 });
 
-// @route   GET api/stories/:id
-router.get('/:id', async (req, res) => {
+// @route   GET api/stories/me
+// @desc    Self profile stories
+router.get('/me', auth, async (req, res) => {
     try {
-        const targetId = req.params.id;
-        const token = req.header('x-auth-token');
-        let isStoryLiked = false;
-
-        if (token) {
-            try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                const user = await User.findById(decoded.user.id);
-                if (user && user.likedStories) {
-                    isStoryLiked = user.likedStories.map(s => s.toString()).includes(targetId);
-                }
-            } catch (err) {}
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(targetId)) {
-            return res.status(404).json({ msg: 'Invalid ID format' });
-        }
-
-        const foundStory = await Story.findByIdAndUpdate(
-            targetId, 
-            { $inc: { views: 1 } }, 
-            { new: true }
-        ).populate('author', ['name']);
-        
-        if (!foundStory) return res.status(404).json({ msg: 'Story not found' });
-        
-        res.json(formatStory(foundStory, isStoryLiked));
+        const myStories = await Story.find({ author: req.user.id })
+            .populate('author', ['name'])
+            .sort({ createdAt: -1 });
+        res.json(myStories.map(s => formatStory(s)));
     } catch (err) {
-        console.error("Fetch Story Error:", err.message);
         res.status(500).send('Server Error');
     }
 });
 
 // @route   POST api/stories
-// @desc    Create a story
+// @desc    Create story (Instagram-style post)
 router.post('/', auth, async (req, res) => {
     try {
         const { title, content, tags, image } = req.body;
-        
-        // BUG FIX: Explicitly setting the author from authenticated user session
         const newStory = new Story({
             title,
             content,
             tags,
             image,
-            author: req.user.id 
+            author: req.user.id // Critical: Linking to authenticated user
         });
 
         const savedStory = await newStory.save();
@@ -118,78 +92,102 @@ router.post('/', auth, async (req, res) => {
     }
 });
 
-// @route   PUT api/stories/:id/like
-router.put('/:id/like', auth, async (req, res) => {
+// @route   GET api/stories/:id
+router.get('/:id', async (req, res) => {
+    try {
+        const targetId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(targetId)) return res.status(404).json({ msg: 'Invalid ID' });
+
+        const token = req.header('x-auth-token');
+        let isStoryLiked = false;
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                const user = await User.findById(decoded.user.id);
+                if (user) isStoryLiked = user.likedStories.includes(targetId);
+            } catch (err) {}
+        }
+
+        const foundStory = await Story.findByIdAndUpdate(targetId, { $inc: { views: 1 } }, { new: true })
+            .populate('author', ['name']);
+        
+        if (!foundStory) return res.status(404).json({ msg: 'Story not found' });
+        res.json(formatStory(foundStory, isStoryLiked));
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/stories/:id/like
+// @desc    Instagram-like Like/Unlike
+router.post('/:id/like', auth, async (req, res) => {
     try {
         const storyId = req.params.id;
-        if (!mongoose.Types.ObjectId.isValid(storyId)) {
-            return res.status(400).json({ msg: 'Invalid Story ID' });
-        }
-        let story = await Story.findById(storyId);
+        const story = await Story.findById(storyId);
         if (!story) return res.status(404).json({ msg: 'Story not found' });
         
         const user = await User.findById(req.user.id);
-        const likedStoriesArr = (user.likedStories || []).map(s => s.toString());
-        const alreadyLiked = likedStoriesArr.includes(storyId);
+        const alreadyLiked = user.likedStories.includes(storyId);
 
         if (alreadyLiked) {
-            // BUG FIX: Standardizing array manipulation
-            user.likedStories = likedStoriesArr.filter(id => id !== storyId);
-            if (story) story.likes = Math.max(0, (story.likes || 1) - 1);
+            user.likedStories = user.likedStories.filter(id => id.toString() !== storyId);
+            story.likes = Math.max(0, (story.likes || 1) - 1);
         } else {
-            user.likedStories = [...likedStoriesArr, storyId];
-            if (story) story.likes = (story.likes || 0) + 1;
+            user.likedStories.push(storyId);
+            story.likes = (story.likes || 0) + 1;
+
+            // Trigger Notification (only if liking someone else's story)
+            if (story.author.toString() !== req.user.id) {
+                const newNotif = new Notification({
+                    user: story.author,
+                    sender: req.user.id,
+                    story: storyId,
+                    type: 'like'
+                });
+                await newNotif.save();
+            }
         }
 
         await user.save();
-        if (story) await story.save();
-
-        res.json({ 
-            likes: story ? story.likes : 0, 
-            isLiked: !alreadyLiked 
-        });
+        await story.save();
+        res.json({ likes: story.likes, isLiked: !alreadyLiked });
     } catch (err) {
-        console.error("Like Error:", err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/stories/:id/save
+// @desc    Bookmark/Save story
+router.post('/:id/save', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        const storyId = req.params.id;
+        const alreadySaved = user.savedStories.includes(storyId);
+
+        if (alreadySaved) {
+            user.savedStories = user.savedStories.filter(id => id.toString() !== storyId);
+        } else {
+            user.savedStories.push(storyId);
+        }
+
+        await user.save();
+        res.json({ isSaved: !alreadySaved });
+    } catch (err) {
         res.status(500).send('Server Error');
     }
 });
 
 // @route   DELETE api/stories/:id
-// @desc    Delete a story
 router.delete('/:id', auth, async (req, res) => {
     try {
         const story = await Story.findById(req.params.id);
         if (!story) return res.status(404).json({ msg: 'Story not found' });
-
-        // Check if user owns the story
-        if (story.author.toString() !== req.user.id) {
-            return res.status(401).json({ msg: 'user not authorized to delete this tale' });
-        }
+        if (story.author.toString() !== req.user.id) return res.status(401).json({ msg: 'Unauthorized' });
 
         await Story.findByIdAndDelete(req.params.id);
-        res.json({ msg: 'Story removed successfully' });
+        res.json({ msg: 'Tale deleted' });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-// @route   PUT api/stories/:id/rate
-router.put('/:id/rate', auth, async (req, res) => {
-    try {
-        const { rating } = req.body;
-        const story = await Story.findById(req.params.id);
-        if (!story) return res.status(404).json({ msg: 'Story not found' });
-
-        const currentCount = 10;
-        const currentAvg = story.rating || 0;
-        const newAvg = ((currentAvg * currentCount) + rating) / (currentCount + 1);
-        
-        story.rating = Number(newAvg.toFixed(1));
-        await story.save();
-        res.json(story.rating);
-    } catch (err) {
-        console.error(err.message);
         res.status(500).send('Server Error');
     }
 });
