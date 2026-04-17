@@ -154,6 +154,44 @@ router.put('/:id/like', auth, async (req, res) => {
     }
 });
 
-// ... (other routes like delete, rate) ...
+// @route   DELETE api/stories/:id
+// @desc    Delete a story
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const story = await Story.findById(req.params.id);
+        if (!story) return res.status(404).json({ msg: 'Story not found' });
+
+        // Check if user owns the story
+        if (story.author.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'user not authorized to delete this tale' });
+        }
+
+        await Story.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'Story removed successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT api/stories/:id/rate
+router.put('/:id/rate', auth, async (req, res) => {
+    try {
+        const { rating } = req.body;
+        const story = await Story.findById(req.params.id);
+        if (!story) return res.status(404).json({ msg: 'Story not found' });
+
+        const currentCount = 10;
+        const currentAvg = story.rating || 0;
+        const newAvg = ((currentAvg * currentCount) + rating) / (currentCount + 1);
+        
+        story.rating = Number(newAvg.toFixed(1));
+        await story.save();
+        res.json(story.rating);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 module.exports = router;
