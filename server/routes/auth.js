@@ -2,31 +2,24 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const Story = require('../models/Story');
 
 // @route   POST api/auth/register
-// @desc    Register user
 router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
-
     try {
-        console.log("Registering user with email:", email);
-        let user = await User.findOne({ email });
-        if (user) {
-            console.log("Registration failed: User with email " + email + " already exists in DB");
-            return res.status(400).json({ msg: 'User already exists' });
-        }
+        let existingUser = await User.findOne({ email });
+        if (existingUser) return res.status(400).json({ msg: 'User already exists' });
 
-        user = new User({ name, email, password });
-
+        const newUser = new User({ name, email, password });
         const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
+        newUser.password = await bcrypt.hash(password, salt);
+        await newUser.save();
 
-        await user.save();
-
-        const payload = { user: { id: user.id, name: user.name, email: user.email } };
-
+        const payload = { user: { id: newUser.id, name: newUser.name, email: newUser.email } };
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5 days' }, (err, token) => {
             if (err) throw err;
             res.json({ token, user: payload.user });
@@ -38,19 +31,16 @@ router.post('/register', async (req, res) => {
 });
 
 // @route   POST api/auth/login
-// @desc    Authenticate user & get token
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
     try {
-        let user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ msg: 'Invalid Credentials' });
+        const foundUser = await User.findOne({ email });
+        if (!foundUser) return res.status(400).json({ msg: 'Invalid Credentials' });
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, foundUser.password);
         if (!isMatch) return res.status(400).json({ msg: 'Invalid Credentials' });
 
-        const payload = { user: { id: user.id, name: user.name, email: user.email } };
-
+        const payload = { user: { id: foundUser.id, name: foundUser.name, email: foundUser.email } };
         jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5 days' }, (err, token) => {
             if (err) throw err;
             res.json({ token, user: payload.user });
@@ -61,72 +51,107 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// @route   GET api/auth/users
-// @desc    Get all users for Admin Panel
-router.get('/users', async (req, res) => {
-    try {
-        const users = await User.find().select('-password').sort({ createdAt: -1 });
-        res.json(users);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ msg: 'Server Error' });
-    }
-});
-
 // @route   GET api/auth/profile
-// @desc    Get user profile (including liked stories)
 router.get('/profile', auth, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
-        const likedIds = (user.likedStories || []).map(id => id.toString());
+        const userDoc = await User.findById(req.user.id).select('-password');
+        if (!userDoc) return res.status(404).json({ msg: 'User not found' });
+
+        const rawLikedIds = (userDoc.likedStories || []).map(id => id.toString());
         
-        // Manually populate liked stories
-        const mongoose = require('mongoose');
-        const validLikedIds = likedIds.filter(id => mongoose.Types.ObjectId.isValid(id) && !id.startsWith('d000'));
-        const Story = require('../models/Story');
-        const populatedLiked = await Story.find({ _id: { $in: validLikedIds } }).populate('author', 'name');
+        // Filter out corrupted data or dummy IDs for the real DB lookup
+        const dbLikedIds = rawLikedIds.filter(id => mongoose.Types.ObjectId.isValid(id) && !id.startsWith('d000'));
+        const populatedRealStories = await Story.find({ _id: { $in: dbLikedIds } }).populate('author', 'name');
         
-        // Metadata for default stories so they show up in profile
-        const dummyMeta = {
+        const dummyLookup = {
             'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
             'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
             'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
             'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
         };
 
-        const finalLiked = likedIds.map(id => {
-            const real = populatedLiked.find(s => s._id.toString() === id);
-            if (real) return real;
-            if (dummyMeta[id]) {
-                const dm = dummyMeta[id];
-                return { 
-                    _id: id, 
-                    title: dm.title, 
-                    author: dm.author, 
-                    likes: dm.likes + 1, // Reflect the user's like
-                    views: dm.views,
-                    tags: dm.tags,
-                    isDummy: true 
-                };
+        const assembledLiked = rawLikedIds.map(id => {
+            const realStory = populatedRealStories.find(s => s._id.toString() === id);
+            if (realStory) return realStory;
+            if (dummyLookup[id]) {
+                const dm = dummyLookup[id];
+                return { _id: id, title: dm.title, author: dm.author, likes: dm.likes, views: dm.views, tags: dm.tags, isDummy: true };
             }
             return null;
-        }).filter(item => item !== null);
+        }).filter(Boolean);
         
-        const userObj = user.toObject();
-        userObj.likedStories = finalLiked;
+        const finalUserObj = userDoc.toObject();
+        finalUserObj.likedStories = assembledLiked;
         
-        res.json(userObj);
+        res.json(finalUserObj);
     } catch (err) {
-        console.error(err.message);
+        console.error("Profile Fetch Error:", err.message);
         res.status(500).json({ msg: 'Server Error' });
     }
 });
 
+// @route   PUT api/auth/save/:id
+router.put('/save/:id', auth, async (req, res) => {
+    try {
+        const userToUpdate = await User.findById(req.user.id);
+        const storyIdToSave = req.params.id;
+        
+        // Ensure we only store strings, filter out bad data
+        let currentSaved = (userToUpdate.savedStories || [])
+            .map(s => s.toString())
+            .filter(s => s !== '[object Object]');
+            
+        const isCurrentlySaved = currentSaved.includes(storyIdToSave);
+
+        if (isCurrentlySaved) {
+            userToUpdate.savedStories = currentSaved.filter(id => id !== storyIdToSave);
+        } else {
+            userToUpdate.savedStories = [...currentSaved, storyIdToSave];
+        }
+
+        await userToUpdate.save();
+        res.json({ savedStories: userToUpdate.savedStories });
+    } catch (err) {
+        console.error("Save Story Error:", err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET api/auth/saved
+router.get('/saved', auth, async (req, res) => {
+    try {
+        const activeUser = await User.findById(req.user.id);
+        const idsToPopulate = (activeUser.savedStories || [])
+            .map(id => id.toString())
+            .filter(id => id !== '[object Object]');
+        
+        const realIds = idsToPopulate.filter(id => mongoose.Types.ObjectId.isValid(id) && !id.startsWith('d000'));
+        const realPopulated = await Story.find({ _id: { $in: realIds } }).populate('author', 'name');
+        
+        const dummyLookup = {
+            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
+            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
+            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
+            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
+        };
+
+        const finalReadingList = idsToPopulate.map(id => {
+            const real = realPopulated.find(s => s._id.toString() === id);
+            if (real) return real;
+            if (dummyLookup[id]) return { _id: id, ...dummyLookup[id], isDummy: true };
+            return { _id: id, title: 'Archived Story', isDummy: true };
+        });
+
+        res.json(finalReadingList);
+    } catch (err) {
+        console.error("Fetch Saved Error:", err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   PUT api/auth/update-profile
-// @desc    Update user profile
 router.put('/update-profile', auth, async (req, res) => {
     const { name, bio, avatar } = req.body;
-
     try {
         let user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ msg: 'User not found' });
@@ -136,77 +161,10 @@ router.put('/update-profile', auth, async (req, res) => {
         if (avatar) user.avatar = avatar;
 
         await user.save();
-        
-        // Return updated user (excluding password)
-        const updatedUser = { 
-            id: user.id, 
-            name: user.name, 
-            email: user.email,
-            bio: user.bio,
-            avatar: user.avatar
-        };
-        
-        res.json(updatedUser);
+        res.json({ id: user.id, name: user.name, email: user.email, bio: user.bio, avatar: user.avatar });
     } catch (err) {
         console.error(err.message);
         res.status(500).json({ msg: 'Server Error' });
-    }
-});
-
-// @route   PUT api/auth/save/:id
-// @desc    Save/Unsave story to reading list
-router.put('/save/:id', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        const storyId = req.params.id;
-        
-        let savedArr = (user.savedStories || []).map(s => s.toString());
-        const isSaved = savedArr.includes(storyId);
-
-        if (isSaved) {
-            user.savedStories = savedArr.filter(id => id !== storyId);
-        } else {
-            user.savedStories = [...savedArr, storyId];
-        }
-
-        await user.save();
-        res.json({ savedStories: user.savedStories });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-// @route   GET api/auth/saved
-// @desc    Get populated reading list
-router.get('/saved', auth, async (req, res) => {
-    try {
-        const user = await User.findById(req.user.id);
-        const savedIds = (user.savedStories || []).map(id => id.toString());
-        
-        const mongoose = require('mongoose');
-        const validSavedIds = savedIds.filter(id => mongoose.Types.ObjectId.isValid(id) && !id.startsWith('d000'));
-        const Story = require('../models/Story');
-        const populated = await Story.find({ _id: { $in: validSavedIds } }).populate('author', 'name');
-        
-        const dummyMeta = {
-            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
-            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
-            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
-            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
-        };
-
-        const final = savedIds.map(id => {
-            const real = populated.find(s => s._id.toString() === id);
-            if (real) return real;
-            if (dummyMeta[id]) return { _id: id, ...dummyMeta[id], isDummy: true };
-            return { _id: id, title: 'Unknown Story', isDummy: true };
-        });
-
-        res.json(final);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
     }
 });
 
