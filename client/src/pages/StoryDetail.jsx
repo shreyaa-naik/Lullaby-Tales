@@ -266,7 +266,10 @@ const StoryDetail = () => {
         }
     };
 
-    const isSaved = savedStories?.some(s => (s.id || s._id) === id || s.title === story.title);
+    const isSaved = savedStories?.some(s => {
+        const sid = typeof s === 'string' ? s : (s.id || s._id);
+        return sid === id || s?.title === story?.title;
+    });
 
     const handleSaveToggle = () => {
         if (!user) {
@@ -274,11 +277,10 @@ const StoryDetail = () => {
             return;
         }
         if (isSaved) {
-            const storyToUnsave = savedStories.find(s => (s.id || s._id) === id || s.title === story.title);
-            if (storyToUnsave) unsaveStory(storyToUnsave.id || storyToUnsave._id);
+            unsaveStory(id);
             toast.success('Removed from Reading List');
         } else {
-            saveStory({ ...story, id: id }); 
+            saveStory(id); 
             toast.success('Saved to Reading List!');
         }
     };

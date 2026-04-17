@@ -16,7 +16,11 @@ const StoryCard = ({ story, isOwner, onDelete }) => {
     const { user, saveStory, unsaveStory, savedStories } = useAuth();
     
     // Check if the story is already saved
-    const isSaved = savedStories?.some(s => (s.id || s._id) === (story.id || story._id));
+    // savedStories might contain strings (from AuthContext) or objects (from Profile)
+    const isSaved = savedStories?.some(s => {
+        const sid = typeof s === 'string' ? s : (s.id || s._id);
+        return sid === (story.id || story._id);
+    });
 
     const handleSaveToggle = (e) => {
         e.preventDefault(); // Prevent linking if the button is within a link or something
@@ -31,7 +35,7 @@ const StoryCard = ({ story, isOwner, onDelete }) => {
             unsaveStory(story.id || story._id);
             toast.success('Removed from Reading List');
         } else {
-            saveStory(story);
+            saveStory(story.id || story._id);
             toast.success('Saved to Reading List!');
         }
     };

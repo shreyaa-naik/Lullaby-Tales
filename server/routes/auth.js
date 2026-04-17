@@ -81,8 +81,10 @@ router.get('/profile', auth, async (req, res) => {
         const likedIds = (user.likedStories || []).map(id => id.toString());
         
         // Manually populate liked stories
+        const mongoose = require('mongoose');
+        const validLikedIds = likedIds.filter(id => mongoose.Types.ObjectId.isValid(id) && !id.startsWith('d000'));
         const Story = require('../models/Story');
-        const populatedLiked = await Story.find({ _id: { $in: likedIds } }).populate('author', 'name');
+        const populatedLiked = await Story.find({ _id: { $in: validLikedIds } }).populate('author', 'name');
         
         // Metadata for default stories so they show up in profile
         const dummyMeta = {
@@ -182,8 +184,10 @@ router.get('/saved', auth, async (req, res) => {
         const user = await User.findById(req.user.id);
         const savedIds = (user.savedStories || []).map(id => id.toString());
         
+        const mongoose = require('mongoose');
+        const validSavedIds = savedIds.filter(id => mongoose.Types.ObjectId.isValid(id) && !id.startsWith('d000'));
         const Story = require('../models/Story');
-        const populated = await Story.find({ _id: { $in: savedIds } }).populate('author', 'name');
+        const populated = await Story.find({ _id: { $in: validSavedIds } }).populate('author', 'name');
         
         const dummyMeta = {
             'd000000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
