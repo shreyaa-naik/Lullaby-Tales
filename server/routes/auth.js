@@ -40,17 +40,6 @@ router.get('/profile', auth, async (req, res) => {
 
         if (!userDoc) return res.status(404).json({ msg: 'User not found' });
 
-        const rawLikedIds = (userDoc.likedStories || []);
-        
-        // Handle fallback for Dummy stories that aren't in the database
-        const dummyLookup = {
-            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, tags: ['Fantasy'] },
-            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, tags: ['Adventure'] },
-            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, tags: ['Steampunk'] },
-            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, tags: ['Historical'] }
-        };
-
-        // Standardizing the response to match frontend requirements
         const finalUserObj = userDoc.toObject();
         finalUserObj.likedStories = userDoc.likedStories.map(s => formatStory(s));
         

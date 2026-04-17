@@ -14,51 +14,6 @@ const StoryFeed = () => {
     const [showSortMenu, setShowSortMenu] = useState(false);
     const [dbStories, setDbStories] = useState([]);
 
-    // Permanent Dummy showcase
-    const dummyStories = [
-        {
-            id: 'd00000000000000000000001',
-            title: 'The Midnight Star',
-            content: 'Under the silver moon, the stars began to dance in a rhythm only the night knew...',
-            authorName: 'Luna Lovegood',
-            tags: ['Fantasy', 'Short Story'],
-            likes: 124,
-            averageRating: 4.8,
-            views: '45k',
-            image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80'
-        },
-        {
-            id: 'd00000000000000000000002',
-            title: 'Echoes of the Forest',
-            authorName: 'Caspian Thorne',
-            tags: ['Adventure', 'Nature'],
-            likes: 89,
-            averageRating: 4.7,
-            views: '12k',
-            image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80'
-        },
-        {
-            id: 'd00000000000000000000003',
-            title: 'Clockwork Dreams',
-            authorName: 'Arthur Gears',
-            tags: ['Steampunk', 'Mystery'],
-            likes: 245,
-            averageRating: 4.8,
-            views: '31k',
-            image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'
-        },
-        {
-            id: 'd00000000000000000000004',
-            title: 'The Last Alchemist',
-            authorName: 'Julian Thorne',
-            tags: ['Historical', 'Magic'],
-            likes: 560,
-            averageRating: 5.0,
-            views: '58k',
-            image: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=800&q=80'
-        }
-    ];
-
     React.useEffect(() => {
         const fetchStories = async () => {
             try {
@@ -86,9 +41,7 @@ const StoryFeed = () => {
         fetchStories();
     }, []);
 
-    const allStories = [...dummyStories, ...dbStories];
-
-    const filteredStories = allStories.filter(s => 
+    const filteredStories = dbStories.filter(s => 
         (s.title || '').toLowerCase().includes(search.toLowerCase()) || 
         (s.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()))
     ).sort((a, b) => {

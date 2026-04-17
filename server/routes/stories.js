@@ -62,7 +62,6 @@ router.get('/me', auth, async (req, res) => {
 router.get('/:id', async (req, res) => {
     try {
         const targetId = req.params.id;
-        const isDummyTale = targetId.startsWith('d000');
         const token = req.header('x-auth-token');
         let isStoryLiked = false;
 
@@ -74,28 +73,6 @@ router.get('/:id', async (req, res) => {
                     isStoryLiked = user.likedStories.map(s => s.toString()).includes(targetId);
                 }
             } catch (err) {}
-        }
-
-        if (isDummyTale) {
-            const dummyBases = {
-                'd00000000000000000000001': { title: 'The Midnight Star', likes: 124, content: "Under the silver moon...", authorName: 'Luna Lovegood' },
-                'd00000000000000000000002': { title: 'Echoes of the Forest', likes: 89, content: "In the heart of the woods...", authorName: 'Caspian Thorne' },
-                'd00000000000000000000003': { title: 'Clockwork Dreams', likes: 245, content: "The city of Oakhaven...", authorName: 'Arthur Gears' },
-                'd00000000000000000000004': { title: 'The Last Alchemist', likes: 560, content: "Nicholas stood before...", authorName: 'Julian Thorne' }
-            };
-            const dm = dummyBases[targetId] || { title: 'Unknown', likes: 0 };
-            return res.json({
-                _id: targetId,
-                title: dm.title,
-                content: dm.content || '',
-                author: { name: dm.authorName || 'Author' },
-                likes: dm.likes + (isStoryLiked ? 1 : 0),
-                views: 0,
-                tags: [],
-                image: '',
-                isLiked: isStoryLiked,
-                isDummy: true
-            });
         }
 
         if (!mongoose.Types.ObjectId.isValid(targetId)) {
@@ -145,16 +122,11 @@ router.post('/', auth, async (req, res) => {
 router.put('/:id/like', auth, async (req, res) => {
     try {
         const storyId = req.params.id;
-        const isDummy = storyId.startsWith('d000');
-        let story = await Story.findById(storyId);
-        
-        // If it's a dummy story, we still want to allow 'liking' it in the user's profile
-        if (!story && isDummy) {
-             // We don't save dummy stories to the Story collection usually,
-             // but we'll return a success state so the User doc can update
+        if (!mongoose.Types.ObjectId.isValid(storyId)) {
+            return res.status(400).json({ msg: 'Invalid Story ID' });
         }
-        
-        if (!isDummy && !story) return res.status(404).json({ msg: 'Story not found' });
+        let story = await Story.findById(storyId);
+        if (!story) return res.status(404).json({ msg: 'Story not found' });
         
         const user = await User.findById(req.user.id);
         const likedStoriesArr = (user.likedStories || []).map(s => s.toString());

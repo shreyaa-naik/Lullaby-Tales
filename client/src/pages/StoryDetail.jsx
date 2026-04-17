@@ -22,71 +22,13 @@ const StoryDetail = () => {
     const [loadingSummary, setLoadingSummary] = useState(false);
     const [error, setError] = useState(null);
 
-    const dummyData = {
-        'd00000000000000000000001': {
-            title: 'The Midnight Star',
-            content: "Under the silver moon, the stars began to dance in a rhythm only the night knew. Leo lived in a coastal village where the ocean roared like a lion. Every night, Leo would climb the highest cliff, reaching his small hands toward the velvet sky, hoping for a spark to land in his palm. He had heard legends of the Star-Fall, a night every hundred years when the heavens weep light. The villagers laughed at his obsession, calling him the 'Boy of Dust', but Leo knew better. He felt the pull of the cosmos in his bones. \n\nOne evening, as the tide pulled back further than ever before, a trail of stardust appeared on the damp sand. Leo followed it, his heart pounding a frantic rhythm against his ribs. The trail led him to a hidden grotto, where the walls glowed with phosphorescence. In the center, a fragment of the sun itself seemed to pulse. It wasn't just light; it was a living, breathing ember of the universe. Leo reached out, his fingertips grazing the warmth, and in that moment, the entire village was bathed in a brilliant, sapphire glow that stayed in the sky for three full days.",
-            authorName: 'Luna Lovegood',
-            tags: ['Fantasy', 'Short Story'],
-            likes: 124,
-            averageRating: 4.9,
-            createdAt: '2024-03-10'
-        },
-        'd00000000000000000000002': {
-            title: 'Echoes of the Forest',
-            content: "Caspian walked through the ancient groves where the trees whispered secrets of a time before man. The moss felt like a plush carpet under his boots as he followed the trail of glowing butterflies deep into the heart of the woods. He had been a tracker for ten years, but these woods were different. The sunlight filtered through the leaves in patterns that seemed like a forgotten language. \n\nSuddenly, the wind died down, and the silence became heavy. Caspian knelt by a stream that flowed with silver water. In the reflection, he didn't see himself; he saw a version of the forest that was vibrant and full of mythical beasts. A dragon made of vines and flowers watched him from the other side. It didn't growl; it nodded, as if acknowledging a fellow guardian. Caspian realized then that he wasn't tracking the forest—the forest was tracking him, testing his worthiness to enter the Inner Sanctum where the Heart of Nature beats eternally.",
-            authorName: 'Caspian Thorne',
-            tags: ['Adventure', 'Nature'],
-            likes: 89,
-            views: 850,
-            averageRating: 4.5,
-            createdAt: '2024-03-12'
-        },
-        'd00000000000000000000003': {
-            title: 'Clockwork Dreams',
-            content: "The city of Oakhaven breathed smoke...",
-            authorName: 'Arthur Gears',
-            tags: ['Steampunk', 'Sci-Fi'],
-            likes: 245,
-            views: 3100,
-            averageRating: 4.9,
-            createdAt: '2024-03-15'
-        },
-        'd00000000000000000000004': {
-            title: 'The Last Alchemist',
-            content: "Nicholas stood before the golden crucible...",
-            authorName: 'Julian Thorne',
-            tags: ['Historical', 'Mystery'],
-            likes: 560,
-            views: 5200,
-            averageRating: 4.7,
-            createdAt: '2024-03-20'
-        }
-    };
+
 
     const getAISummary = async (text) => {
         if (!text) return "This tale remains a mystery, waiting to be unfolded.";
         
         // Use backend API if it's a real story
-        if (!id.startsWith('d0000')) {
-          try {
-              const res = await fetch(`${API_BASE_URL}/api/summary`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ content: text })
-              });
-              const data = await res.json();
-              if (res.ok) return data.summary;
-          } catch (e) {
-              console.error("AI Summary API error", e);
-          }
-        }
 
-        // Fallback or Dummy story logic
-        if (id === 'd00000000000000000000001') return "A poignant exploration of hope and cosmic connection, following young Leo as he discovers that the stars aren't just light in the sky, but living embers of a larger destiny hidden within a coastal grotto.";
-        if (id === 'd00000000000000000000002') return "A mystical adventure deep into the heart of an ancient forest, where Nature itself acts as a sentient witness. Caspian's journey transitions from a simple track to a spiritual test of worthiness among mythical guardians.";
-        if (id === 'd00000000000000000000003') return "A touching steampunk drama centered on the intersection of cold machinery and hot-blooded love. Arthur's lifelong obsession with clockwork culminates in a miracle that breathes life into brass and soul into gears.";
-        if (id === 'd00000000000000000000004') return "A profound historical fantasy about the true nature of wealth. Julian's pursuit of the Philosopher's Stone ends not with gold, but with the realization that cherished memories are the most stable currency of the human heart.";
 
         const sentences = text.split(/[.!?]/).filter(s => s.trim().length > 10);
         if (sentences.length < 3) return text;
@@ -98,24 +40,20 @@ const StoryDetail = () => {
     useEffect(() => {
         const fetchStoryAndComments = async () => {
             const token = localStorage.getItem('token');
+            setLoading(true);
 
             try {
-                // Always fetch from API first to get real liked-status and community counts
                 const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
-                    headers: { 'x-auth-token': token || '' }
+                    headers: token ? { 'x-auth-token': token } : {}
                 });
                 
                 if (res.ok) {
                     const found = await res.json();
-                    // Hybrid logic: Use dummy content for text but LIVE counts/likes from server
-                    const isDummy = id.startsWith('d000');
-                    const baseStory = isDummy ? dummyData[id] : null;
-
                     setStory({
-                        title: found.title || baseStory?.title,
-                        content: (isDummy ? baseStory?.content : found.content) || '',
-                        authorName: found.author?.name || baseStory?.authorName || 'Grand Storyteller',
-                        tags: found.tags || baseStory?.tags || [],
+                        title: found.title,
+                        content: found.content || '',
+                        authorName: found.author?.name || 'Grand Storyteller',
+                        tags: found.tags || [],
                         likes: found.likes ?? 0,
                         views: found.views ?? 0,
                         averageRating: found.rating ?? 0,
@@ -123,35 +61,23 @@ const StoryDetail = () => {
                     });
                     setLiked(!!found.isLiked);
                 } else {
-                    // Fallback for dummy stories if backend is unreachable or returns error
-                    const isDummy = id?.startsWith('d000');
-                    if (isDummy && dummyData[id]) {
-                        setStory(dummyData[id]);
-                    } else {
-                        setError('Tale not found');
-                    }
+                    setError('Tale not found in our archives.');
                 }
 
-                // 2. Always Handle Comments Data
                 const commRes = await fetch(`${API_BASE_URL}/api/comments/${id}`);
                 if (commRes.ok) {
                     const commData = await commRes.json();
                     setComments(commData);
                 }
             } catch (err) {
-                console.error(err);
-                const isDummy = id?.startsWith('d000');
-                if (isDummy && dummyData[id]) {
-                    setStory(dummyData[id]);
-                } else {
-                    setError('Server error connecting to library');
-                }
+                console.error("Story Loading Error:", err);
+                setError("Our archives are currently unreachable.");
             } finally {
                 setLoading(false);
             }
         };
         fetchStoryAndComments();
-    }, [id, user]);
+    }, [id]);
 
     const handlePostComment = async () => {
         if (!user) return toast.error("Please login to comment");
