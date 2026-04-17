@@ -14,8 +14,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    likedStories: [String], // All story IDs (Real & Dummy)
-    savedStories: [String], // Reading List IDs (Real & Dummy)
+    likedStories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Story'
+    }],
+    savedStories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Story'
+    }],
     bio: {
         type: String,
         default: ""
