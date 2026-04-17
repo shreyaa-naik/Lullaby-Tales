@@ -22,7 +22,7 @@ const StoryDetail = () => {
     const [loadingSummary, setLoadingSummary] = useState(false);
 
     const dummyData = {
-        'd000000000000000000000001': {
+        'd00000000000000000000001': {
             title: 'The Midnight Star',
             content: "Under the silver moon, the stars began to dance in a rhythm only the night knew. Leo lived in a coastal village where the ocean roared like a lion. Every night, Leo would climb the highest cliff, reaching his small hands toward the velvet sky, hoping for a spark to land in his palm. He had heard legends of the Star-Fall, a night every hundred years when the heavens weep light. The villagers laughed at his obsession, calling him the 'Boy of Dust', but Leo knew better. He felt the pull of the cosmos in his bones. \n\nOne evening, as the tide pulled back further than ever before, a trail of stardust appeared on the damp sand. Leo followed it, his heart pounding a frantic rhythm against his ribs. The trail led him to a hidden grotto, where the walls glowed with phosphorescence. In the center, a fragment of the sun itself seemed to pulse. It wasn't just light; it was a living, breathing ember of the universe. Leo reached out, his fingertips grazing the warmth, and in that moment, the entire village was bathed in a brilliant, sapphire glow that stayed in the sky for three full days.",
             authorName: 'Luna Lovegood',
@@ -31,7 +31,7 @@ const StoryDetail = () => {
             averageRating: 4.9,
             createdAt: '2024-03-10'
         },
-        'd000000000000000000000002': {
+        'd00000000000000000000002': {
             title: 'Echoes of the Forest',
             content: "Caspian walked through the ancient groves where the trees whispered secrets of a time before man. The moss felt like a plush carpet under his boots as he followed the trail of glowing butterflies deep into the heart of the woods. He had been a tracker for ten years, but these woods were different. The sunlight filtered through the leaves in patterns that seemed like a forgotten language. \n\nSuddenly, the wind died down, and the silence became heavy. Caspian knelt by a stream that flowed with silver water. In the reflection, he didn't see himself; he saw a version of the forest that was vibrant and full of mythical beasts. A dragon made of vines and flowers watched him from the other side. It didn't growl; it nodded, as if acknowledging a fellow guardian. Caspian realized then that he wasn't tracking the forest—the forest was tracking him, testing his worthiness to enter the Inner Sanctum where the Heart of Nature beats eternally.",
             authorName: 'Caspian Thorne',
@@ -41,7 +41,7 @@ const StoryDetail = () => {
             averageRating: 4.5,
             createdAt: '2024-03-12'
         },
-        'd000000000000000000000003': {
+        'd00000000000000000000003': {
             title: 'Clockwork Dreams',
             content: "The city of Oakhaven breathed smoke...",
             authorName: 'Arthur Gears',
@@ -51,7 +51,7 @@ const StoryDetail = () => {
             averageRating: 4.9,
             createdAt: '2024-03-15'
         },
-        'd000000000000000000000004': {
+        'd00000000000000000000004': {
             title: 'The Last Alchemist',
             content: "Nicholas stood before the golden crucible...",
             authorName: 'Julian Thorne',

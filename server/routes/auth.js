@@ -190,10 +190,10 @@ router.get('/saved', auth, async (req, res) => {
         const populated = await Story.find({ _id: { $in: validSavedIds } }).populate('author', 'name');
         
         const dummyMeta = {
-            'd000000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
-            'd000000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
-            'd000000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
-            'd000000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
+            'd00000000000000000000001': { title: 'The Midnight Star', author: { name: 'Luna Lovegood' }, likes: 124, views: 0, tags: ['Fantasy'] },
+            'd00000000000000000000002': { title: 'Echoes of the Forest', author: { name: 'Caspian Thorne' }, likes: 89, views: 0, tags: ['Adventure'] },
+            'd00000000000000000000003': { title: 'Clockwork Dreams', author: { name: 'Arthur Gears' }, likes: 245, views: 0, tags: ['Steampunk'] },
+            'd00000000000000000000004': { title: 'The Last Alchemist', author: { name: 'Julian Thorne' }, likes: 560, views: 0, tags: ['Historical'] }
         };
 
         const final = savedIds.map(id => {
