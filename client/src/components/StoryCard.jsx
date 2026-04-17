@@ -159,7 +159,9 @@ const StoryCard = ({ story, isOwner, onDelete }) => {
                              style={{ backgroundColor: SOFT, border: `1.5px solid ${BORDER}` }}>
                             <User className="w-3.5 h-3.5" style={{ color: TEXT_H }} />
                         </div>
-                        <span className="text-xs font-bold" style={{ color: TEXT_B }}>{story.authorName || 'Adventurer'}</span>
+                        <Link to={story.author?._id ? `/user/${story.author._id}` : (story.author || '')} className="text-xs font-bold hover:underline" style={{ color: TEXT_B }}>
+                            {story.authorName || 'Adventurer'}
+                        </Link>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1 text-[10px] font-black uppercase" style={{ color: TEXT_B }}>

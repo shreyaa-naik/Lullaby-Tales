@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StoryCard from '../components/StoryCard';
+import InstagramStories from '../components/InstagramStories';
 import { Search, Filter, Sparkles, SlidersHorizontal, BookOpen, TrendingUp, Clock, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -69,6 +70,7 @@ const StoryFeed = () => {
                     id: dbStory._id,
                     title: dbStory.title,
                     content: dbStory.content,
+                    author: dbStory.author?._id || dbStory.author,
                     authorName: dbStory.author?.name || 'Inba',
                     tags: dbStory.tags && dbStory.tags.length > 0 ? dbStory.tags : ['FRESH!'],
                     likes: dbStory.likes || 0,
@@ -139,6 +141,7 @@ const StoryFeed = () => {
             </header>
 
             <div className="max-w-7xl mx-auto px-4 -mt-12 relative z-20">
+                <InstagramStories />
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}

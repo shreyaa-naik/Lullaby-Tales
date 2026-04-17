@@ -48,6 +48,8 @@ app.use('/api/comments', require('./routes/comments'));
 app.use('/api/ratings', require('./routes/ratings'));
 app.use('/api/summary', require('./routes/summary'));
 app.use('/api/config', require('./routes/config'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/daily', require('./routes/dailyStories'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {
