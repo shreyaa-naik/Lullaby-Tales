@@ -32,7 +32,7 @@ const CreateStory = () => {
             
             if (res.ok) {
                 toast.success('Tale published to the stars!');
-                navigate('/feed');
+                navigate('/profile');
             } else {
                 toast.error('Failed to publish story');
             }

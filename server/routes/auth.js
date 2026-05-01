@@ -36,12 +36,17 @@ router.get('/profile', auth, async (req, res) => {
             .populate({
                 path: 'likedStories',
                 populate: { path: 'author', select: 'name' }
+            })
+            .populate({
+                path: 'savedStories',
+                populate: { path: 'author', select: 'name' }
             });
         
         if (!user) return res.status(404).json({ msg: 'User not found' });
 
         const userObj = user.toObject();
-        userObj.likedStories = user.likedStories.map(s => formatStory(s));
+        userObj.likedStories = user.likedStories.filter(s => s).map(s => formatStory(s));
+        userObj.savedStories = user.savedStories.filter(s => s).map(s => formatStory(s));
         res.json(userObj);
     } catch (err) {
         res.status(500).send('Server Error');
@@ -75,6 +80,31 @@ router.get('/notifications', auth, async (req, res) => {
             .sort({ createdAt: -1 });
         res.json(notifications);
     } catch (err) {
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST api/auth/register
+router.post('/register', async (req, res) => {
+    const { name, email, password } = req.body;
+    try {
+        let user = await User.findOne({ email });
+        if (user) return res.status(400).json({ msg: 'User already exists' });
+
+        user = new User({ name, email, password });
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(password, salt);
+
+        await user.save();
+
+        const payload = { user: { id: user.id, name: user.name, email: user.email } };
+        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5 days' }, (err, token) => {
+            if (err) throw err;
+            res.json({ token, user: payload.user });
+        });
+    } catch (err) {
+        console.error(err.message);
         res.status(500).send('Server Error');
     }
 });

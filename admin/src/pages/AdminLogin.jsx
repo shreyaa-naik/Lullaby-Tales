@@ -14,6 +14,7 @@ const AdminLogin = ({ setAuth }) => {
         // Exact requirement: "the admin had the deafut passowrd and userbame no one can login thta"
         if (username === 'admin' && password === 'admin123') {
             localStorage.setItem('adminAuth', 'true');
+            localStorage.setItem('adminUser', username);
             setAuth(true);
             navigate('/dashboard');
         } else {

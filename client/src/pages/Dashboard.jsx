@@ -15,9 +15,17 @@ const Dashboard = () => {
             const res = await fetch(`${API_BASE_URL}/api/stories/me`, {
                 headers: { 'x-auth-token': token }
             });
-            const data = await res.json();
-            setUserStories(data);
-        } catch(e) { console.error(e); }
+            
+            if (res.ok) {
+                const data = await res.json();
+                setUserStories(Array.isArray(data) ? data : []);
+            } else {
+                setUserStories([]);
+            }
+        } catch(e) { 
+            console.error("Dashboard Fetch Error:", e); 
+            setUserStories([]);
+        }
     };
 
     useEffect(() => {

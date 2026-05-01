@@ -23,10 +23,17 @@ import API_BASE_URL from '../config';
 const LandingPage = () => {
     const [config, setConfig] = React.useState({ siteName: 'LullabyTales', heroSubtitle: 'Discover thousands of hand-crafted tales from a global community of authentic authors.' });
     
+    const [trendingStories, setTrendingStories] = React.useState([]);
     React.useEffect(() => {
         fetch(`${API_BASE_URL}/api/config`).then(r=>r.json()).then(data => {
             if(data) setConfig(data);
         }).catch(()=>{});
+
+        fetch(`${API_BASE_URL}/api/stories/trending`)
+            .then(res => res.json())
+            .then(data => {
+                if(Array.isArray(data)) setTrendingStories(data);
+            }).catch(()=>{});
     }, []);
 
     const BRAND = 'var(--brand-color, #D49E8D)';
@@ -39,41 +46,6 @@ const LandingPage = () => {
         { name: 'Sci-Fi', icon: '🚀', count: '5k+', color: 'bg-cyan-50 text-cyan-600' },
         { name: 'Horror', icon: '👻', count: '3k+', color: 'bg-orange-50 text-rose-600' },
         { name: 'Adventure', icon: '🏔️', count: '10k+', color: 'bg-emerald-50 text-emerald-600' },
-    ];
-
-    const trendingStories = [
-        {
-            title: "The Whispering Willows",
-            author: "Luna Moonwell",
-            reads: "45.2k",
-            rating: "4.9",
-            image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
-            category: "Fantasy"
-        },
-        {
-            title: "Echoes of Silence",
-            author: "Silas Vane",
-            reads: "12.8k",
-            rating: "4.7",
-            image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
-            category: "Mystery"
-        },
-        {
-            title: "Heart of the Nebula",
-            author: "Astra Orion",
-            reads: "31.5k",
-            rating: "4.8",
-            image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80",
-            category: "Sci-Fi"
-        },
-        {
-            title: "The Last Alchemist",
-            author: "Julian Thorne",
-            reads: "56k",
-            rating: "5.0",
-            image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=800&q=80",
-            category: "Historical"
-        }
     ];
 
     return (
@@ -196,33 +168,39 @@ const LandingPage = () => {
                     </div>
 
                     <div className="flex gap-8 overflow-x-auto scrollbar-hide pb-10 -mx-4 px-4">
-                        {trendingStories.map((story, i) => (
+                        {trendingStories.length > 0 ? trendingStories.map((story, i) => (
                             <motion.div key={i} style={{ perspective: 1000 }} className="flex-shrink-0 w-72 group cursor-pointer z-10">
-                                <motion.div
-                                    whileHover={{ y: -15, rotateX: 10, rotateY: -10, scale: 1.05, boxShadow: '0 30px 60px rgba(104, 59, 43, 0.3)' }}
-                                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                    className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden mb-6 shadow-2xl shadow-slate-200 border border-slate-100 bg-ivory transform-gpu"
-                                >
-                                    <img src={story.image} alt={story.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                    <div className="absolute top-5 left-5 bg-ivory/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white">
-                                        <div className="flex items-center gap-1.5">
-                                            <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                                            <span className="text-[10px] font-black">{story.rating}</span>
+                                <Link to={`/story/${story._id}`}>
+                                    <motion.div
+                                        whileHover={{ y: -15, rotateX: 10, rotateY: -10, scale: 1.05, boxShadow: '0 30px 60px rgba(104, 59, 43, 0.3)' }}
+                                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                        className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden mb-6 shadow-2xl shadow-slate-200 border border-slate-100 bg-ivory transform-gpu"
+                                    >
+                                        <img src={story.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'} alt={story.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                        <div className="absolute top-5 left-5 bg-ivory/95 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-white">
+                                            <div className="flex items-center gap-1.5">
+                                                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                                                <span className="text-[10px] font-black">{story.averageRating ? story.averageRating.toFixed(1) : '0.0'}</span>
+                                            </div>
+                                        </div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-brand-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                    </motion.div>
+                                    <h3 className="text-xl font-display font-bold mb-2 truncate transition-colors" style={{ color: '#683B2B' }}>{story.title}</h3>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-medium" style={{ color: '#D49E8D' }}>By {story.author?.name || 'Unknown'}</span>
+                                        <div className="flex items-center gap-1 text-[10px] font-black uppercase text-slate-400">
+                                            <Eye className="w-3.5 h-3.5" /> {story.views || 0}
                                         </div>
                                     </div>
-                                    <div className="absolute inset-0 bg-gradient-to-t from-brand-900/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                </motion.div>
-                                <h3 className="text-xl font-display font-bold mb-2 truncate transition-colors" style={{ color: '#683B2B' }}>{story.title}</h3>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm font-medium" style={{ color: '#D49E8D' }}>By {story.author}</span>
-                                    <div className="flex items-center gap-1 text-[10px] font-black uppercase text-slate-400">
-                                        <Eye className="w-3.5 h-3.5" /> {story.reads}
-                                    </div>
-                                </div>
+                                </Link>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <p className="text-slate-500 italic">No trending stories available.</p>
+                        )}
                     </div>
                 </section>
+
+
 
                 {/* --- STATS --- */}
                 <section className="rounded-[4rem] p-12 md:p-24 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #FAF6F2, #DED1BD)', border: '1.5px solid rgba(104,59,43,0.1)', boxShadow: '0 16px 64px rgba(104, 59, 43, 0.08)' }}>

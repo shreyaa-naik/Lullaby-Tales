@@ -20,10 +20,13 @@ const Dashboard = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            const masterConfig = {
+                headers: { 'x-master-key': 'StoryVerse_Master_2026' }
+            };
             const [usersRes, storiesRes, configRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/api/auth/users`),
-                axios.get(`${API_BASE_URL}/api/stories`),
-                axios.get(`${API_BASE_URL}/api/config`)
+                axios.get(`${API_BASE_URL}/api/admin/users`, masterConfig),
+                axios.get(`${API_BASE_URL}/api/admin/stories`, masterConfig),
+                axios.get(`${API_BASE_URL}/api/config`, masterConfig)
             ]);
             setUsers(usersRes.data);
             setStories(storiesRes.data);
@@ -59,6 +62,7 @@ const Dashboard = () => {
                         <div>
                             <h1 className="text-3xl font-bold text-white">Platform Overview</h1>
                             <p className="text-slate-500">Live statistics and user moderation.</p>
+                            <p className="text-emerald-400 text-xs mt-2 font-mono bg-emerald-400/10 inline-block px-2 py-1 rounded">Logged in as: <span className="font-bold">{localStorage.getItem('adminUser') || 'admin'}</span></p>
                         </div>
                         <div className="ml-8 flex bg-slate-800 p-1 rounded-xl">
                             <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'overview' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-white'}`}>Overview</button>
@@ -69,7 +73,7 @@ const Dashboard = () => {
                         <button onClick={fetchData} className="flex items-center gap-2 px-4 py-2 bg-slate-800 rounded-lg hover:bg-slate-700 transition">
                             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
                         </button>
-                        <button onClick={() => { localStorage.removeItem('adminAuth'); window.location.href='/'; }} className="px-4 py-2 border border-rose-500 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-slate-900 transition font-bold text-sm">
+                        <button onClick={() => { localStorage.removeItem('adminAuth'); localStorage.removeItem('adminUser'); window.location.href='/'; }} className="px-4 py-2 border border-rose-500 text-rose-500 rounded-lg hover:bg-rose-500 hover:text-slate-900 transition font-bold text-sm">
                             Lock Panel
                         </button>
                     </div>

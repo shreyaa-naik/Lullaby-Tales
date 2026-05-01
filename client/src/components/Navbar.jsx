@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, User, PlusCircle, BookOpen, Menu, X, ArrowLeft } from 'lucide-react';
+import { LogOut, User, PlusCircle, BookOpen, Menu, X, ArrowLeft, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_BG       = 'rgba(250, 246, 242, 0.95)'; // opaque initially
@@ -12,7 +12,7 @@ const NAV_TEXT_H   = '#683B2B'; // Dark brown
 const NAV_TEXT_B   = '#82574A'; // Medium brown
 
 const Navbar = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, notifications } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [scrolled, setScrolled]       = useState(false);
@@ -78,13 +78,6 @@ const Navbar = () => {
                                     <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                                 )}
                             </Link>
-
-                            <Link to="/dashboard"
-                                className="text-[11px] font-black uppercase tracking-widest transition-colors"
-                                style={{ color: NAV_TEXT_B }}
-                                onMouseEnter={e => e.currentTarget.style.color = NAV_BRAND}
-                                onMouseLeave={e => e.currentTarget.style.color = NAV_TEXT_B}
-                            >Studio</Link>
 
                             <Link to="/create-story"
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
@@ -159,7 +152,6 @@ const Navbar = () => {
                             {user ? (
                                 <>
                                     <Link to="/profile" className="text-xl font-display font-black" style={{ color: NAV_TEXT_H }} onClick={() => setMobileMenuOpen(false)}>My Profile</Link>
-                                    <Link to="/dashboard" className="text-xl font-display font-black" style={{ color: NAV_TEXT_H }} onClick={() => setMobileMenuOpen(false)}>Studio</Link>
                                     <Link to="/create-story" className="text-xl font-display font-black" style={{ color: NAV_BRAND }} onClick={() => setMobileMenuOpen(false)}>New Tale</Link>
                                     <button onClick={handleLogout} className="text-xl font-display font-black text-left" style={{ color: NAV_BRAND }}>Sign Out</button>
                                 </>

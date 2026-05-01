@@ -1,23 +1,94 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, BookOpen, Star, TrendingUp, Search, UserMinus, Trash2 } from 'lucide-react';
+import { Shield, Users, BookOpen, Star, TrendingUp, UserMinus, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-hot-toast';
+import API_BASE_URL from '../config';
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
+    const [users, setUsers] = useState([]);
+    const [stories, setStories] = useState([]);
+    const [stats, setStats] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Mock Admin Data
-    const stats = [
-        { label: 'Total Users', value: '1,245', icon: <Users className="w-5 h-5 text-blue-500" /> },
-        { label: 'Total Tales', value: '4,890', icon: <BookOpen className="w-5 h-5 text-rose-500" /> },
-        { label: 'Avg Rating', value: '4.8', icon: <Star className="w-5 h-5 text-amber-500" /> },
-        { label: 'Server Status', value: 'Healthy', icon: <TrendingUp className="w-5 h-5 text-emerald-500" /> }
-    ];
+    const token = localStorage.getItem('token');
 
-    const mockUsers = [
-        { id: 1, name: 'Luna Lovegood', email: 'luna@storyverse.com', tales: 12, joined: '2024-01-15' },
-        { id: 2, name: 'Silas Vane', email: 'silas@storyverse.com', tales: 5, joined: '2024-02-12' },
-        { id: 3, name: 'Astra Orion', email: 'astra@storyverse.com', tales: 8, joined: '2024-03-01' }
-    ];
+    const fetchAdminData = async () => {
+        setLoading(true);
+        try {
+            const [usersRes, storiesRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/api/admin/users`, { headers: { 'x-auth-token': token } }),
+                fetch(`${API_BASE_URL}/api/admin/stories`, { headers: { 'x-auth-token': token } })
+            ]);
+
+            if (usersRes.ok && storiesRes.ok) {
+                const usersData = await usersRes.json();
+                const storiesData = await storiesRes.json();
+                setUsers(usersData);
+                setStories(storiesData);
+                
+                // Calculate Stats
+                setStats([
+                    { label: 'Total Users', value: usersData.length, icon: <Users className="w-5 h-5 text-blue-500" /> },
+                    { label: 'Total Tales', value: storiesData.length, icon: <BookOpen className="w-5 h-5 text-rose-500" /> },
+                    { label: 'Avg Reads', value: Math.round(storiesData.reduce((acc, s) => acc + (s.views || 0), 0) / (storiesData.length || 1)), icon: <TrendingUp className="w-5 h-5 text-emerald-500" /> },
+                    { label: 'Engagement', value: `${storiesData.reduce((acc, s) => acc + (s.likes || 0), 0)} Likes`, icon: <Star className="w-5 h-5 text-amber-500" /> }
+                ]);
+            } else {
+                toast.error("Failed to load administration data");
+            }
+        } catch (err) {
+            toast.error("Network error on moderation bridge");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAdminData();
+    }, []);
+
+    const deleteUser = async (userId) => {
+        if (!window.confirm('Erase this user and ALL their tales? This is permanent.')) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/users/${userId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            if (res.ok) {
+                toast.success('User removed from StoryVerse');
+                fetchAdminData();
+            } else {
+                const data = await res.json();
+                toast.error(data.msg || 'Deletion failed');
+            }
+        } catch (err) { toast.error('Server error'); }
+    };
+
+    const deleteStory = async (storyId) => {
+        if (!window.confirm('Remove this tale from the library?')) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/stories/${storyId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            if (res.ok) {
+                toast.success('Tale unbooked by administrator');
+                fetchAdminData();
+            } else {
+                toast.error('Could not remove tale');
+            }
+        } catch (err) { toast.error('Server error'); }
+    };
+
+    if (loading && activeTab === 'overview') {
+        return (
+            <div className="pt-40 text-center">
+                <Loader2 className="w-10 h-10 animate-spin mx-auto mb-4 text-[#D49E8D]" />
+                <p className="font-display font-black text-[#683B2B]">Accessing Master Logs...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="pt-28 pb-20 px-4 max-w-7xl mx-auto min-h-screen flex flex-col md:flex-row gap-8">
@@ -81,24 +152,24 @@ const AdminDashboard = () => {
                                 <thead className="bg-slate-50 border-b text-xs font-bold text-[#82574A] uppercase tracking-wider">
                                     <tr>
                                         <th className="px-6 py-4">Author</th>
-                                        <th className="px-6 py-4">Stories</th>
                                         <th className="px-6 py-4">Joined Date</th>
                                         <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {mockUsers.map(user => (
-                                        <tr key={user.id} className="border-b last:border-0 hover:bg-slate-50/50">
+                                    {users.map(u => (
+                                        <tr key={u._id} className="border-b last:border-0 hover:bg-slate-50/50">
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-[#683B2B]">{user.name}</div>
-                                                <div className="text-xs text-slate-400">{user.email}</div>
+                                                <div className="font-bold text-[#683B2B]">{u.name} {u.isAdmin && <span className="ml-2 px-2 py-0.5 bg-rose-50 text-rose-500 rounded-md text-[10px]">Admin</span>}</div>
+                                                <div className="text-xs text-slate-400">{u.email}</div>
                                             </td>
-                                            <td className="px-6 py-4 font-bold text-[#D49E8D]">{user.tales}</td>
-                                            <td className="px-6 py-4 text-sm text-slate-500">{user.joined}</td>
+                                            <td className="px-6 py-4 text-sm text-slate-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                                             <td className="px-6 py-4 text-right">
-                                                <button className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors tooltip" title="Delete User">
-                                                    <UserMinus className="w-4 h-4" />
-                                                </button>
+                                                {!u.isAdmin && (
+                                                    <button onClick={() => deleteUser(u._id)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Delete User">
+                                                        <UserMinus className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -109,13 +180,36 @@ const AdminDashboard = () => {
                 )}
 
                 {activeTab === 'stories' && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20">
-                        <BookOpen className="w-16 h-16 mb-4 text-[#DED1BD]" />
-                        <h4 className="text-lg font-bold text-[#683B2B]">Story Moderation Suite</h4>
-                        <p className="text-sm text-[#82574A]">Review reported stories and manage platform content here.</p>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        <h3 className="text-2xl font-bold mb-6 text-[#683B2B]">Tale Moderation</h3>
+                        <div className="bg-white rounded-2xl border overflow-hidden">
+                            <table className="w-full text-left">
+                                <thead className="bg-slate-50 border-b text-xs font-bold text-[#82574A] uppercase tracking-wider">
+                                    <tr>
+                                        <th className="px-6 py-4">Story Title</th>
+                                        <th className="px-6 py-4">Author</th>
+                                        <th className="px-6 py-4">Engagement</th>
+                                        <th className="px-6 py-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {stories.map(s => (
+                                        <tr key={s._id} className="border-b last:border-0 hover:bg-slate-50/50">
+                                            <td className="px-6 py-4 font-bold text-[#683B2B]">{s.title}</td>
+                                            <td className="px-6 py-4 text-sm text-[#82574A]">{s.author?.name}</td>
+                                            <td className="px-6 py-4 text-xs font-bold text-slate-400">{s.views} Views · {s.likes} Likes</td>
+                                            <td className="px-6 py-4 text-right">
+                                                <button onClick={() => deleteStory(s._id)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Story">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </motion.div>
                 )}
-
             </div>
         </div>
     );

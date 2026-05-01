@@ -7,7 +7,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import StoryFeed from './pages/StoryFeed';
 import StoryDetail from './pages/StoryDetail';
-import Dashboard from './pages/Dashboard';
 import CreateStory from './pages/CreateStory';
 import EditStory from './pages/EditStory';
 import Trending from './pages/Trending';
@@ -17,6 +16,7 @@ import Community from './pages/Community';
 import Help from './pages/Help';
 import Privacy from './pages/Privacy';
 import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import AdminDashboard from './pages/AdminDashboard';
 import PublicProfile from './pages/PublicProfile';
@@ -54,7 +54,6 @@ const App = () => {
           <Route path="/story/:id" element={<StoryDetail />} />
           <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
           <Route path="/edit-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/user/:id" element={<PublicProfile />} />

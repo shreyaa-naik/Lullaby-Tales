@@ -9,6 +9,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
+  'http://localhost:5174',
   'https://lullaby-tales.vercel.app',
   'https://lullaby-tales-admin.vercel.app'
 ];
@@ -50,6 +51,7 @@ app.use('/api/summary', require('./routes/summary'));
 app.use('/api/config', require('./routes/config'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/daily', require('./routes/dailyStories'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

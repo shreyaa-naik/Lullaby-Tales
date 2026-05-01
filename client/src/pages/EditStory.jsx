@@ -52,7 +52,7 @@ const EditStory = () => {
             
             if (res.ok) {
                 toast.success('Tale updated and preserved!');
-                navigate('/dashboard');
+                navigate('/profile');
             } else {
                 const errorData = await res.json();
                 toast.error(`Error: ${errorData.msg || 'Update failed'}`);
