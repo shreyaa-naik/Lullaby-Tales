@@ -61,7 +61,7 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: BG }}>
+        <div className="min-h-screen flex flex-col items-center justify-start pt-32 pb-20 px-4" style={{ backgroundColor: BG }}>
             <div className="max-w-md w-full">
 
                 <div className="text-center mb-10">

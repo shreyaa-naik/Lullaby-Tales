@@ -1,0 +1,290 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520" fill="none">
+
+  <!-- ========== DEFS ========== -->
+  <defs>
+    <!-- Book pages gradient -->
+    <linearGradient id="pageGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FDF5E8"/>
+      <stop offset="100%" stop-color="#F5E6CC"/>
+    </linearGradient>
+    <!-- Left cover gradient -->
+    <linearGradient id="coverLeft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8B4F38"/>
+      <stop offset="100%" stop-color="#5C2E1A"/>
+    </linearGradient>
+    <!-- Right cover gradient -->
+    <linearGradient id="coverRight" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A0604A"/>
+      <stop offset="100%" stop-color="#683B2B"/>
+    </linearGradient>
+    <!-- Candle flame gradient -->
+    <radialGradient id="flameGrad" cx="50%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#FFF0A0"/>
+      <stop offset="60%" stop-color="#F4A830"/>
+      <stop offset="100%" stop-color="#E05A20" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Candle glow -->
+    <radialGradient id="candleGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F4A830" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#F4A830" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Moon gradient -->
+    <radialGradient id="moonGrad" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFF8DC"/>
+      <stop offset="100%" stop-color="#F0D080"/>
+    </radialGradient>
+    <!-- Drop shadow filter -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#683B2B" flood-opacity="0.18"/>
+    </filter>
+    <filter id="glowFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ========== MOON ========== -->
+  <circle cx="490" cy="70" r="42" fill="url(#moonGrad)" opacity="0.92"/>
+  <!-- Moon crescent shadow -->
+  <circle cx="503" cy="62" r="36" fill="#FAF6F2" opacity="0.55"/>
+  <!-- Moon stars -->
+  <g fill="#E8C060" opacity="0.9">
+    <circle cx="460" cy="38" r="2.5"/>
+    <circle cx="533" cy="48" r="2"/>
+    <circle cx="545" cy="85" r="1.8"/>
+    <circle cx="448" cy="90" r="1.5"/>
+    <circle cx="505" cy="22" r="1.5"/>
+  </g>
+
+  <!-- ========== TWINKLING STARS scattered ========== -->
+  <g fill="#C9956A" opacity="0.5">
+    <polygon points="70,40 72,35 74,40 79,40 75,44 77,49 72,46 67,49 69,44 65,40" transform="scale(0.5) translate(90,45)"/>
+    <polygon points="520,140 522,135 524,140 529,140 525,144 527,149 522,146 517,149 519,144 515,140" transform="scale(0.45) translate(650,160)"/>
+  </g>
+
+  <!-- Floating sparkle dots -->
+  <g fill="#D49E8D" opacity="0.6">
+    <circle cx="48" cy="100" r="3"/>
+    <circle cx="555" cy="155" r="2.5"/>
+    <circle cx="30" cy="320" r="2"/>
+    <circle cx="580" cy="280" r="2"/>
+    <circle cx="100" cy="450" r="2.5"/>
+    <circle cx="500" cy="420" r="2"/>
+  </g>
+
+  <!-- ========== BIRDS (flying) ========== -->
+  <!-- Bird 1 -->
+  <path d="M80 150 Q86 144 92 150 Q86 148 80 150Z" fill="#683B2B" opacity="0.7"/>
+  <!-- Bird 2 -->
+  <path d="M110 130 Q117 123 124 130 Q117 127 110 130Z" fill="#683B2B" opacity="0.5"/>
+  <!-- Bird 3 -->
+  <path d="M55 180 Q60 174 66 180 Q60 178 55 180Z" fill="#9B6B55" opacity="0.6"/>
+
+  <!-- ========== LARGE OPEN BOOK ========== -->
+  <g filter="url(#softShadow)">
+    <!-- Left Cover -->
+    <path d="M90 310 Q88 240 100 220 L295 220 L295 390 Q200 380 90 390 Z" fill="url(#coverLeft)" rx="8"/>
+    <!-- Left cover pattern (embossed diamond) -->
+    <path d="M160 270 L180 250 L200 270 L180 290 Z" fill="none" stroke="#C4845A" stroke-width="1" opacity="0.5"/>
+    <circle cx="180" cy="270" r="5" fill="none" stroke="#C4845A" stroke-width="1" opacity="0.5"/>
+    <!-- Left Page -->
+    <path d="M105 315 Q103 245 114 226 L292 226 L292 385 Q205 376 105 385 Z" fill="url(#pageGrad)"/>
+    <!-- Left page lines -->
+    <g stroke="#C8A882" stroke-width="1" opacity="0.5">
+      <line x1="135" y1="270" x2="270" y2="262"/>
+      <line x1="135" y1="285" x2="270" y2="278"/>
+      <line x1="135" y1="300" x2="270" y2="293"/>
+      <line x1="135" y1="315" x2="270" y2="308"/>
+      <line x1="135" y1="330" x2="270" y2="323"/>
+      <line x1="135" y1="345" x2="265" y2="338"/>
+    </g>
+    <!-- Left page decorative initial letter -->
+    <text x="128" y="262" font-family="Georgia, serif" font-size="28" fill="#8B4F38" opacity="0.6" font-style="italic">L</text>
+
+    <!-- Right Cover -->
+    <path d="M510 310 Q512 240 500 220 L305 220 L305 390 Q400 380 510 390 Z" fill="url(#coverRight)" rx="8"/>
+    <!-- Right cover pattern -->
+    <path d="M420 270 L440 250 L460 270 L440 290 Z" fill="none" stroke="#C4845A" stroke-width="1" opacity="0.5"/>
+    <circle cx="440" cy="270" r="5" fill="none" stroke="#C4845A" stroke-width="1" opacity="0.5"/>
+    <!-- Right Page -->
+    <path d="M495 315 Q497 245 486 226 L308 226 L308 385 Q395 376 495 385 Z" fill="url(#pageGrad)"/>
+    <!-- Right page lines -->
+    <g stroke="#C8A882" stroke-width="1" opacity="0.5">
+      <line x1="330" y1="270" x2="465" y2="262"/>
+      <line x1="330" y1="285" x2="465" y2="278"/>
+      <line x1="330" y1="300" x2="465" y2="293"/>
+      <line x1="330" y1="315" x2="465" y2="308"/>
+      <line x1="330" y1="330" x2="465" y2="323"/>
+      <line x1="335" y1="345" x2="465" y2="338"/>
+    </g>
+
+    <!-- Book spine -->
+    <rect x="292" y="220" width="16" height="170" rx="2" fill="#3D1F10"/>
+    <!-- Spine gold lines -->
+    <line x1="296" y1="230" x2="304" y2="230" stroke="#C9A050" stroke-width="1"/>
+    <line x1="296" y1="380" x2="304" y2="380" stroke="#C9A050" stroke-width="1"/>
+
+    <!-- Book binding at bottom -->
+    <path d="M90 388 Q300 400 510 388 Q300 415 90 388 Z" fill="#3D1F10" opacity="0.7"/>
+  </g>
+
+  <!-- ========== RIBBON BOOKMARK ========== -->
+  <path d="M355 220 L365 220 L365 290 L360 280 L355 290 Z" fill="#C0404A" opacity="0.85"/>
+
+  <!-- ========== CANDLE (on book) ========== -->
+  <!-- Candle glow aura -->
+  <ellipse cx="175" cy="215" rx="55" ry="55" fill="url(#candleGlow)"/>
+  <!-- Candle body -->
+  <rect x="162" y="175" width="22" height="55" rx="4" fill="#FDF5E8" stroke="#E8D0B0" stroke-width="1"/>
+  <!-- Candle drips -->
+  <path d="M164 178 Q162 188 164 192" fill="none" stroke="#F5E6CC" stroke-width="3" stroke-linecap="round"/>
+  <path d="M181 180 Q183 190 181 195" fill="none" stroke="#F5E6CC" stroke-width="3" stroke-linecap="round"/>
+  <!-- Wick -->
+  <line x1="173" y1="175" x2="173" y2="168" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Flame -->
+  <path d="M173 168 Q168 155 171 145 Q173 135 173 130 Q175 140 178 148 Q181 158 173 168Z" fill="url(#flameGrad)" filter="url(#glowFilter)"/>
+  <!-- Flame inner highlight -->
+  <path d="M173 165 Q171 158 172 150 Q173 143 173 140 Q174 148 175 155 Q176 162 173 165Z" fill="#FFFBE0" opacity="0.8"/>
+  <!-- Candle saucer -->
+  <ellipse cx="173" cy="230" rx="18" ry="5" fill="#D4B896" opacity="0.9"/>
+
+  <!-- ========== INKWELL & QUILL (on book, right side) ========== -->
+  <!-- Inkwell -->
+  <ellipse cx="430" cy="235" rx="14" ry="8" fill="#2C1A0E" opacity="0.85"/>
+  <path d="M416 228 Q416 250 430 254 Q444 250 444 228 Z" fill="#3D2510" opacity="0.9"/>
+  <ellipse cx="430" cy="228" rx="14" ry="7" fill="#4A2E16" opacity="0.85"/>
+  <ellipse cx="430" cy="227" rx="10" ry="4" fill="#1A0A04" opacity="0.7"/>
+  <!-- Ink glimmer -->
+  <ellipse cx="426" cy="226" rx="3" ry="1.5" fill="#6B4226" opacity="0.8"/>
+  <!-- Quill feather -->
+  <path d="M435 225 Q450 200 470 170 Q460 185 445 210 Q440 218 435 225Z" fill="#E8D9C0" opacity="0.95"/>
+  <!-- Quill barbs left -->
+  <path d="M450 195 Q445 200 442 207" stroke="#C8B090" stroke-width="1.2" fill="none" opacity="0.8"/>
+  <path d="M456 188 Q451 193 448 200" stroke="#C8B090" stroke-width="1.2" fill="none" opacity="0.8"/>
+  <path d="M462 181 Q457 186 454 193" stroke="#C8B090" stroke-width="1.2" fill="none" opacity="0.8"/>
+  <!-- Quill barbs right -->
+  <path d="M450 195 Q455 202 456 210" stroke="#C8B090" stroke-width="1.2" fill="none" opacity="0.8"/>
+  <path d="M456 188 Q461 195 462 203" stroke="#C8B090" stroke-width="1.2" fill="none" opacity="0.8"/>
+  <!-- Quill tip -->
+  <path d="M435 225 Q433 228 432 232" stroke="#8B6A40" stroke-width="1.5" fill="none"/>
+
+  <!-- ========== BOTANICAL FLORALS ========== -->
+
+  <!-- LEFT SIDE: Rose branch -->
+  <!-- Stem -->
+  <path d="M40 420 Q60 380 80 340 Q95 300 110 270" stroke="#5A7040" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Leaves -->
+  <path d="M65 375 Q50 360 55 340 Q70 355 65 375Z" fill="#6B8A48" opacity="0.85"/>
+  <path d="M78 348 Q95 335 100 315 Q82 328 78 348Z" fill="#7A9952" opacity="0.8"/>
+  <path d="M55 400 Q35 390 30 368 Q50 375 55 400Z" fill="#6B8A48" opacity="0.75"/>
+  <!-- Rose bloom 1 -->
+  <g transform="translate(100,258)">
+    <circle cx="0" cy="0" r="18" fill="#C85070"/>
+    <path d="M0,-12 Q8,-5 8,5 Q0,12 -8,5 Q-8,-5 0,-12Z" fill="#E07088"/>
+    <path d="M10,-8 Q15,2 10,12 Q2,8 2,-2 Q6,-6 10,-8Z" fill="#D46080"/>
+    <path d="M-10,-8 Q-15,2 -10,12 Q-2,8 -2,-2 Q-6,-6 -10,-8Z" fill="#D46080"/>
+    <circle cx="0" cy="0" r="7" fill="#E8889A"/>
+    <circle cx="0" cy="0" r="3" fill="#F0A0B0"/>
+  </g>
+  <!-- Rosebud -->
+  <g transform="translate(72,340)">
+    <path d="M0,-8 Q5,-2 5,4 Q0,8 -5,4 Q-5,-2 0,-8Z" fill="#D06878"/>
+    <path d="M0,-8 L0,8" stroke="#5A7040" stroke-width="1.5"/>
+  </g>
+
+  <!-- RIGHT SIDE: Wisteria / hanging blooms -->
+  <path d="M560 100 Q555 160 548 200 Q542 240 538 290" stroke="#5A7040" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Wisteria clusters -->
+  <g opacity="0.9">
+    <!-- Cluster 1 -->
+    <ellipse cx="548" cy="175" rx="7" ry="10" fill="#9B7EC8"/>
+    <ellipse cx="540" cy="182" rx="6" ry="9" fill="#8B6EB8"/>
+    <ellipse cx="555" cy="185" rx="6" ry="9" fill="#AC8ED8"/>
+    <ellipse cx="548" cy="192" rx="5" ry="8" fill="#7B5EA8"/>
+    <!-- Cluster 2 -->
+    <ellipse cx="543" cy="220" rx="7" ry="10" fill="#9B7EC8"/>
+    <ellipse cx="536" cy="228" rx="6" ry="9" fill="#8B6EB8"/>
+    <ellipse cx="551" cy="226" rx="6" ry="9" fill="#AC8ED8"/>
+    <ellipse cx="543" cy="237" rx="5" ry="8" fill="#7B5EA8"/>
+    <!-- Cluster 3 -->
+    <ellipse cx="539" cy="263" rx="6" ry="9" fill="#9B7EC8"/>
+    <ellipse cx="532" cy="272" rx="5" ry="8" fill="#8B6EB8"/>
+    <ellipse cx="546" cy="270" rx="5" ry="8" fill="#AC8ED8"/>
+  </g>
+  <!-- Wisteria leaves -->
+  <path d="M560 120 Q575 110 580 95 Q568 105 560 120Z" fill="#6B8A48" opacity="0.8"/>
+  <path d="M556 145 Q572 137 575 122 Q562 132 556 145Z" fill="#7A9952" opacity="0.75"/>
+
+  <!-- BOTTOM LEFT: Daisy / wildflowers -->
+  <g transform="translate(80,440)">
+    <!-- Daisy 1 -->
+    <g>
+      <line x1="0" y1="0" x2="0" y2="-15" stroke="#FAFAE0" stroke-width="2.5"/>
+      <line x1="0" y1="0" x2="14" y2="-6" stroke="#FAFAE0" stroke-width="2.5"/>
+      <line x1="0" y1="0" x2="10" y2="10" stroke="#FAFAE0" stroke-width="2.5"/>
+      <line x1="0" y1="0" x2="-10" y2="10" stroke="#FAFAE0" stroke-width="2.5"/>
+      <line x1="0" y1="0" x2="-14" y2="-6" stroke="#FAFAE0" stroke-width="2.5"/>
+      <circle cx="0" cy="0" r="7" fill="#F4C430"/>
+    </g>
+  </g>
+  <!-- Daisy 2 -->
+  <g transform="translate(130,460)">
+    <line x1="0" y1="0" x2="0" y2="-12" stroke="#FAFAE0" stroke-width="2"/>
+    <line x1="0" y1="0" x2="11" y2="-5" stroke="#FAFAE0" stroke-width="2"/>
+    <line x1="0" y1="0" x2="8" y2="8" stroke="#FAFAE0" stroke-width="2"/>
+    <line x1="0" y1="0" x2="-8" y2="8" stroke="#FAFAE0" stroke-width="2"/>
+    <line x1="0" y1="0" x2="-11" y2="-5" stroke="#FAFAE0" stroke-width="2"/>
+    <circle cx="0" cy="0" r="5" fill="#F4C430"/>
+  </g>
+
+  <!-- BOTTOM RIGHT: Lavender sprigs -->
+  <g transform="translate(450,440)">
+    <!-- Stem 1 -->
+    <line x1="0" y1="0" x2="-10" y2="-70" stroke="#5A7040" stroke-width="2"/>
+    <ellipse cx="-10" cy="-70" rx="4" ry="7" fill="#7B6BC0"/>
+    <ellipse cx="-14" cy="-58" rx="3.5" ry="6" fill="#8B7BD0"/>
+    <ellipse cx="-8" cy="-60" rx="3.5" ry="6" fill="#8B7BD0"/>
+    <!-- Stem 2 -->
+    <line x1="18" y1="0" x2="10" y2="-60" stroke="#5A7040" stroke-width="2"/>
+    <ellipse cx="10" cy="-60" rx="4" ry="7" fill="#7B6BC0"/>
+    <ellipse cx="6" cy="-49" rx="3.5" ry="6" fill="#8B7BD0"/>
+    <ellipse cx="14" cy="-50" rx="3.5" ry="6" fill="#8B7BD0"/>
+    <!-- Stem 3 -->
+    <line x1="36" y1="0" x2="32" y2="-50" stroke="#5A7040" stroke-width="2"/>
+    <ellipse cx="32" cy="-50" rx="3.5" ry="6" fill="#7B6BC0"/>
+    <ellipse cx="28" cy="-40" rx="3" ry="5" fill="#8B7BD0"/>
+    <ellipse cx="36" cy="-41" rx="3" ry="5" fill="#8B7BD0"/>
+    <!-- Leaves -->
+    <path d="M0,0 Q-12,5 -18,15 Q-8,8 0,0Z" fill="#6B8A48" opacity="0.8"/>
+    <path d="M18,0 Q22,8 28,16 Q20,6 18,0Z" fill="#6B8A48" opacity="0.8"/>
+  </g>
+
+  <!-- ========== SMALL MUSIC NOTES (whimsical) ========== -->
+  <g fill="#D49E8D" opacity="0.5">
+    <text x="48" y="235" font-size="18" font-family="serif">♪</text>
+    <text x="538" y="350" font-size="14" font-family="serif">♫</text>
+    <text x="70" y="480" font-size="12" font-family="serif">♩</text>
+  </g>
+
+  <!-- ========== FLOATING LEAF MOTIFS ========== -->
+  <g opacity="0.4" fill="#6B8A48">
+    <path d="M510 460 Q520 448 530 460 Q520 455 510 460Z"/>
+    <path d="M492 472 Q502 460 512 472 Q502 467 492 472Z"/>
+    <path d="M65 140 Q75 128 85 140 Q75 135 65 140Z"/>
+  </g>
+
+  <!-- ========== BANNER/RIBBON with text ========== -->
+  <g transform="translate(130, 408)">
+    <!-- Ribbon left tail -->
+    <path d="M0,16 L-10,0 L0,16 Z" fill="#8B4F38"/>
+    <!-- Ribbon right tail -->
+    <path d="M340,16 L350,0 L340,16 Z" fill="#8B4F38"/>
+    <!-- Ribbon body -->
+    <rect x="0" y="6" width="340" height="22" rx="4" fill="#8B4F38"/>
+    <!-- Ribbon center fold -->
+    <path d="M0,6 Q170,-2 340,6" fill="#A0604A"/>
+    <!-- Ribbon text -->
+    <text x="170" y="22" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="10.5" fill="#FDF5E8" letter-spacing="3" font-style="italic">✦  Where Stories Come Alive  ✦</text>
+  </g>
+
+</svg>

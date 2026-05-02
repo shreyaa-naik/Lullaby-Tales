@@ -20,11 +20,16 @@ import Notifications from './pages/Notifications';
 import Settings from './pages/Settings';
 import AdminDashboard from './pages/AdminDashboard';
 import PublicProfile from './pages/PublicProfile';
+import About from './pages/About';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 import API_BASE_URL from './config';
 
+import { AnimatePresence, motion } from 'framer-motion';
+
 const App = () => {
+  const location = useLocation();
+
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/config`)
       .then(res => res.json())
@@ -36,8 +41,18 @@ const App = () => {
       .catch(console.error);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   return (
-    <div className="flex flex-col min-h-screen bg-transparent">
+    <div className="flex flex-col min-h-screen bg-transparent selection:bg-[#D49E8D] selection:text-white relative overflow-hidden">
+      {/* Decorative Floating Petals */}
+      <div className="petal" style={{ left: '10%', animationDuration: '15s', animationDelay: '0s' }}>🌸</div>
+      <div className="petal" style={{ left: '30%', animationDuration: '18s', animationDelay: '2s' }}>🌸</div>
+      <div className="petal" style={{ left: '60%', animationDuration: '12s', animationDelay: '4s' }}>🌸</div>
+      <div className="petal" style={{ left: '80%', animationDuration: '20s', animationDelay: '1s' }}>🌸</div>
+      
       <Navbar />
       <Toaster
         position="bottom-right"
@@ -46,26 +61,37 @@ const App = () => {
         }}
       />
       <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/feed" element={<StoryFeed />} />
-          <Route path="/story/:id" element={<StoryDetail />} />
-          <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
-          <Route path="/edit-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-          <Route path="/user/:id" element={<PublicProfile />} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/trending" element={<Trending />} />
-          <Route path="/awards" element={<Awards />} />
-          <Route path="/verify" element={<Verify />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/privacy" element={<Privacy />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <Routes location={location}>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/feed" element={<StoryFeed />} />
+              <Route path="/story/:id" element={<ProtectedRoute><StoryDetail /></ProtectedRoute>} />
+              <Route path="/create-story" element={<ProtectedRoute><CreateStory /></ProtectedRoute>} />
+              <Route path="/edit-story/:id" element={<ProtectedRoute><EditStory /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+              <Route path="/user/:id" element={<PublicProfile />} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/trending" element={<Trending />} />
+              <Route path="/awards" element={<Awards />} />
+              <Route path="/verify" element={<Verify />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
       </main>
       <Footer />
     </div>

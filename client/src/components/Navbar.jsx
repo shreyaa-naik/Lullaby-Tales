@@ -4,18 +4,19 @@ import { useAuth } from '../context/AuthContext';
 import { LogOut, User, PlusCircle, BookOpen, Menu, X, ArrowLeft, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NAV_BG       = 'rgba(250, 246, 242, 0.95)'; // opaque initially
-const NAV_BG_DARK  = 'rgba(250, 246, 242, 0.4)'; // transparent on scroll
-const NAV_BRAND    = '#D49E8D'; // Light Rose
-const NAV_BRAND_DK = '#C76A55'; // Darker Rose
-const NAV_TEXT_H   = '#683B2B'; // Dark brown
-const NAV_TEXT_B   = '#82574A'; // Medium brown
+const NAV_BG = 'transparent';
+const NAV_BG_DARK = 'rgba(250, 246, 242, 0.2)'; // Very subtle frosted look on scroll
+const NAV_BRAND = '#D49E8D';
+const NAV_BRAND_DK = '#C76A55';
+const NAV_TEXT_H = '#381611';
+const NAV_TEXT_B = '#5A453B';
 
 const Navbar = () => {
     const { user, logout, notifications } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [scrolled, setScrolled]       = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
@@ -39,92 +40,142 @@ const Navbar = () => {
         >
             <div className="max-w-7xl mx-auto py-4 flex justify-between items-center">
 
-                {/* Logo & Back */}
-                <div className="flex items-center gap-4">
-                    {location.pathname !== '/' && (
-                        <button 
-                            onClick={() => navigate(-1)}
-                            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:bg-white/50 group"
+                {/* Logo Area */}
+                <div className="flex items-center">
+                    <Link to="/" className="flex items-center gap-4 group">
+                        <motion.div
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            animate={{
+                                y: [0, -4, 0],
+                                rotate: [0, 2, -2, 0]
+                            }}
+                            transition={{
+                                y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+                                rotate: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                            }}
+                            className="w-12 h-12 rounded-[0.6rem] flex items-center justify-center shadow-md cursor-pointer"
+                            style={{ backgroundColor: '#D49E8D' }}
+                        >
+                            <BookOpen className="w-6 h-6" style={{ color: '#FAF6F2' }} />
+                        </motion.div>
+                        <motion.span
+                            whileHover={{ x: 3 }}
+                            className="text-2xl font-display font-black tracking-tight"
                             style={{ color: NAV_TEXT_H }}
                         >
-                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                        </button>
-                    )}
-                    <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-2xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300 shadow-md"
-                             style={{ backgroundColor: scrolled ? NAV_BRAND : NAV_BRAND }}>
-                            <BookOpen className="w-5 h-5" style={{ color: '#FAF6F2' }} />
-                        </div>
-                        <span className="text-2xl font-display font-black tracking-tighter" style={{ color: NAV_TEXT_H }}>
-                            Lullaby<span style={{ color: NAV_BRAND }}>Tales</span>
-                        </span>
+                            Lullaby<span className="font-normal" style={{ color: NAV_TEXT_H }}>Tales</span>
+                        </motion.span>
                     </Link>
                 </div>
 
                 {/* Desktop */}
-                <div className="hidden md:flex items-center gap-8">
-                    <Link to="/feed"
-                        className="text-[11px] font-black uppercase tracking-widest transition-colors"
-                        style={{ color: NAV_TEXT_B }}
-                        onMouseEnter={e => e.currentTarget.style.color = NAV_BRAND}
-                        onMouseLeave={e => e.currentTarget.style.color = NAV_TEXT_B}
-                    >Library</Link>
+                <div className="hidden md:flex items-center gap-10">
+                    <div className="flex items-center gap-8">
+                        <Link to="/feed" className="text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#D49E8D]" style={{ color: NAV_TEXT_H }}>Library</Link>
+                        <Link to="/#community" className="text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#D49E8D]" style={{ color: NAV_TEXT_H }}>Community</Link>
+                        <Link to="/about" className="text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#D49E8D]" style={{ color: NAV_TEXT_H }}>About</Link>
+                    </div>
 
-                    {user ? (
-                        <div className="flex items-center gap-6">
-                            <Link to="/notifications" className="relative p-2 rounded-xl transition-all hover:bg-white/50" style={{ color: NAV_TEXT_H }}>
-                                <Bell className="w-5 h-5" />
-                                {notifications?.length > 0 && (
-                                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                                )}
-                            </Link>
+                    <div className="flex items-center gap-5">
+                        {user ? (
+                            <>
+                                <Link to="/create-story"
+                                    className="flex items-center gap-2 px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+                                    style={{ backgroundColor: '#C76A55', color: '#FAF6F2' }}
+                                    onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#A95846'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.backgroundColor = '#C76A55'; }}
+                                >
+                                    <PlusCircle className="w-4 h-4" /> New Tale
+                                </Link>
 
-                            <Link to="/create-story"
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
-                                style={{ backgroundColor: NAV_BRAND, color: '#FAF6F2' }}
-                                onMouseEnter={e => { e.currentTarget.style.backgroundColor = NAV_BRAND_DK; }}
-                                onMouseLeave={e => { e.currentTarget.style.backgroundColor = NAV_BRAND; }}
-                            >
-                                <PlusCircle className="w-4 h-4" /> New Tale
-                            </Link>
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowNotifications(!showNotifications)}
+                                        className="relative p-1 hover:text-[#D49E8D] transition-colors"
+                                        style={{ color: NAV_TEXT_H }}
+                                    >
+                                        <Bell className="w-5 h-5" />
+                                        {notifications?.length > 0 && (
+                                            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#FAF6F2]"></span>
+                                        )}
+                                    </button>
 
-                            <div className="flex items-center gap-3 pl-5" style={{ borderLeft: `1px solid rgba(104, 59, 43, 0.2)` }}>
-                                <Link to="/profile" className="w-9 h-9 rounded-xl flex items-center justify-center hover:scale-105 transition-transform overflow-hidden shadow-sm" style={{ backgroundColor: '#DED1BD' }}>
-                                    {user.avatar ? (
-                                        <img src={user.avatar} className="w-full h-full object-cover" alt={user.name} />
+                                    <AnimatePresence>
+                                        {showNotifications && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute right-0 mt-4 w-80 bg-white rounded-2xl shadow-2xl border border-[#DED1BD]/50 overflow-hidden z-50"
+                                            >
+                                                <div className="p-4 border-b border-[#DED1BD]/30 bg-[#FAF6F2]/50 flex justify-between items-center">
+                                                    <span className="font-display font-bold text-[#683B2B]">Notifications</span>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#D49E8D]">{notifications?.length || 0} New</span>
+                                                </div>
+                                                <div className="max-h-96 overflow-y-auto">
+                                                    {notifications?.length > 0 ? (
+                                                        notifications.map((n, i) => (
+                                                            <div key={i} className="p-4 border-b border-[#DED1BD]/20 hover:bg-[#FAF6F2] transition-colors cursor-pointer group">
+                                                                <div className="flex gap-3">
+                                                                    <div className="w-10 h-10 rounded-full bg-[#DED1BD]/30 flex-shrink-0 flex items-center justify-center">
+                                                                        <Bell className="w-4 h-4 text-[#683B2B]" />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm text-[#683B2B] leading-tight">
+                                                                            <span className="font-bold">{n.from || 'Someone'}</span> {n.message || 'interacted with your story'}
+                                                                        </p>
+                                                                        <span className="text-[10px] text-[#82574A] opacity-60 mt-1 block uppercase font-bold tracking-tighter">Just now</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="p-8 text-center">
+                                                            <div className="w-16 h-16 rounded-full bg-[#FAF6F2] flex items-center justify-center mx-auto mb-4">
+                                                                <Bell className="w-8 h-8 text-[#DED1BD]" />
+                                                            </div>
+                                                            <p className="text-[#82574A] font-medium">No new notifications</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {notifications?.length > 0 && (
+                                                    <Link to="/notifications" onClick={() => setShowNotifications(false)} className="block p-3 text-center text-[10px] font-black uppercase tracking-[0.2em] bg-[#FAF6F2] text-[#D49E8D] hover:text-[#C76A55] transition-colors border-t border-[#DED1BD]/30">
+                                                        View All Activity
+                                                    </Link>
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                <Link to="/profile" className="w-10 h-10 rounded-full overflow-hidden shadow-md border-2 border-[#DED1BD] hover:border-[#D49E8D] transition-all flex items-center justify-center bg-[#D49E8D]">
+                                    {user?.avatar ? (
+                                        <img src={user.avatar} className="w-full h-full object-cover" alt="Avatar" />
                                     ) : (
-                                        <User className="w-4 h-4" style={{ color: NAV_TEXT_H }} />
+                                        <span className="text-white font-black text-xs">{(user?.name || 'A').charAt(0).toUpperCase()}</span>
                                     )}
                                 </Link>
-                                <div className="flex flex-col">
-                                    <Link to="/profile" className="text-xs font-black hover:underline" style={{ color: NAV_TEXT_H }}>{user.name}</Link>
-                                    <span className="text-[10px] font-bold" style={{ color: NAV_TEXT_B }}>Verified Author</span>
-                                </div>
-                                <button onClick={handleLogout} className="p-1 ml-1 transition-colors"
-                                    style={{ color: NAV_TEXT_B }}
-                                    onMouseEnter={e => e.currentTarget.style.color = NAV_BRAND}
-                                    onMouseLeave={e => e.currentTarget.style.color = NAV_TEXT_B}
+
+                                <button 
+                                    onClick={handleLogout}
+                                    className="p-2 text-[#82574A] hover:text-[#C76A55] transition-colors"
+                                    title="Sign Out"
                                 >
-                                    <LogOut className="w-4 h-4" />
+                                    <LogOut className="w-5 h-5" />
                                 </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-3">
-                            <Link to="/login"
-                                className="text-[11px] font-black uppercase tracking-widest px-5 py-2.5 rounded-xl transition-all"
-                                style={{ color: NAV_TEXT_H }}
-                                onMouseEnter={e => { e.currentTarget.style.color = NAV_BRAND; e.currentTarget.style.backgroundColor = 'rgba(104, 59, 43, 0.05)'; }}
-                                onMouseLeave={e => { e.currentTarget.style.color = NAV_TEXT_H; e.currentTarget.style.backgroundColor = 'transparent'; }}
-                            >Sign In</Link>
-                            <Link to="/register"
-                                className="px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
-                                style={{ backgroundColor: NAV_BRAND, color: '#FAF6F2' }}
-                                onMouseEnter={e => e.currentTarget.style.backgroundColor = NAV_BRAND_DK}
-                                onMouseLeave={e => e.currentTarget.style.backgroundColor = NAV_BRAND}
-                            >Join Community</Link>
-                        </div>
-                    )}
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/login" className="text-[11px] font-black uppercase tracking-[0.2em] transition-all hover:text-[#D49E8D]" style={{ color: NAV_TEXT_H }}>Sign In</Link>
+                                <Link to="/register"
+                                    className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-md"
+                                    style={{ backgroundColor: '#D49E8D', color: '#FAF6F2' }}
+                                >
+                                    Join Community
+                                </Link>
+                            </>
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile toggle */}
@@ -158,7 +209,9 @@ const Navbar = () => {
                             ) : (
                                 <>
                                     <Link to="/login" className="text-xl font-display font-black" style={{ color: NAV_TEXT_H }} onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
-                                    <Link to="/register" className="p-5 rounded-2xl text-center font-black uppercase tracking-widest" style={{ backgroundColor: NAV_BRAND, color: '#FAF6F2' }} onClick={() => setMobileMenuOpen(false)}>Join Community</Link>
+                                    <Link to="/about" className="text-xl font-display font-black" style={{ color: NAV_TEXT_H }} onClick={() => setMobileMenuOpen(false)}>About</Link>
+                                    <Link to="/#community" className="text-xl font-display font-black" style={{ color: NAV_TEXT_H }} onClick={() => setMobileMenuOpen(false)}>Why Lullaby?</Link>
+                                    <Link to="/register" className="p-5 rounded-2xl text-center font-black uppercase tracking-widest shadow-lg" style={{ backgroundColor: NAV_BRAND, color: '#FAF6F2' }} onClick={() => setMobileMenuOpen(false)}>Join Community</Link>
                                 </>
                             )}
                         </div>

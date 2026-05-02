@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
     Heart, Bookmark, MessageCircle, Share2, 
-    ChevronLeft, Send, Clock, Eye, User as UserIcon
+    ChevronLeft, Send, Clock, Eye, User as UserIcon, Sparkles
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import API_BASE_URL from '../config';
 
 const StoryDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { user, saveStory, unsaveStory, savedStories } = useAuth();
     const [story, setStory] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -17,6 +19,26 @@ const StoryDetail = () => {
     const [comments, setComments] = useState([]);
     const [commentText, setCommentText] = useState('');
     const [error, setError] = useState(null);
+    const [summary, setSummary] = useState('');
+    const [summarizing, setSummarizing] = useState(false);
+
+    const fetchSummary = async () => {
+        if (!story?.content) return;
+        setSummarizing(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/summary`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: story.content })
+            });
+            const data = await res.json();
+            setSummary(data.summary);
+        } catch (err) {
+            toast.error('The magic is fading... try again later');
+        } finally {
+            setSummarizing(false);
+        }
+    };
 
     useEffect(() => {
         const fetchStory = async () => {
@@ -94,6 +116,25 @@ const StoryDetail = () => {
         }
     };
 
+    const handleDelete = async () => {
+        if (!window.confirm('Are you sure you want to delete this tale? This action cannot be undone.')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/stories/${id}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            if (res.ok) {
+                toast.success('Your tale has returned to the stars');
+                navigate('/profile');
+            } else {
+                toast.error('Could not remove the story');
+            }
+        } catch (err) {
+            toast.error('Archive connection lost');
+        }
+    };
+
     const isSaved = savedStories?.some(s => (s._id || s.id) === id);
 
     const handleSaveToggle = () => {
@@ -129,14 +170,75 @@ const StoryDetail = () => {
                     <h1 className="text-4xl md:text-6xl font-black text-[#683B2B] mb-8 leading-[1.1]">
                         {story.title}
                     </h1>
-                    <div className="flex items-center gap-6 text-[#82574A] text-sm font-medium">
-                        <div className="flex items-center gap-2"><Clock className="w-4 h-4" /> {new Date(story.createdAt).toLocaleDateString()}</div>
-                        <div className="flex items-center gap-2"><Eye className="w-4 h-4" /> {story.views}</div>
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center gap-6 text-[#82574A] text-sm font-medium">
+                            <div className="flex items-center gap-2"><Clock className="w-4 h-4" /> {new Date(story.createdAt).toLocaleDateString()}</div>
+                            <div className="flex items-center gap-2"><Eye className="w-4 h-4" /> {story.views}</div>
+                        </div>
+
+                        {/* Author Controls */}
+                        {user && (story.author?._id === user.id || story.author?._id === user._id) && (
+                            <div className="flex items-center gap-4">
+                                <Link 
+                                    to={`/edit-story/${id}`}
+                                    className="px-6 py-2 rounded-xl bg-[#D49E8D]/10 text-[#D49E8D] text-[10px] font-black uppercase tracking-widest border border-[#D49E8D]/20 hover:bg-[#D49E8D] hover:text-white transition-all shadow-sm"
+                                >
+                                    Edit Tale
+                                </Link>
+                                <button 
+                                    onClick={handleDelete}
+                                    className="px-6 py-2 rounded-xl bg-red-50 text-red-500 text-[10px] font-black uppercase tracking-widest border border-red-100 hover:bg-red-500 hover:text-white transition-all shadow-sm"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 
+                {/* AI Analyzer Section */}
+                {story.content && (
+                    <div className="px-8 md:px-12 pt-8">
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            className="p-6 rounded-[2rem] bg-gradient-to-br from-[#FAF6F2] to-[#F5E6D3] border border-[#D49E8D]/20 shadow-inner relative overflow-hidden group"
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                <Sparkles className="w-12 h-12 text-[#683B2B]" />
+                            </div>
+                            
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 rounded-xl bg-white shadow-sm">
+                                    <Sparkles className="w-4 h-4 text-[#D49E8D]" />
+                                </div>
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-[#683B2B]">Tale Insight</h3>
+                            </div>
+
+                            {!summary ? (
+                                <button 
+                                    onClick={fetchSummary}
+                                    disabled={summarizing}
+                                    className="text-xs font-bold text-[#82574A] hover:text-[#D49E8D] transition-colors flex items-center gap-2"
+                                >
+                                    {summarizing ? 'Unweaving the magic...' : 'Reveal Story Essence'}
+                                    <ChevronLeft className="w-3 h-3 rotate-180" />
+                                </button>
+                            ) : (
+                                <motion.p 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-sm italic font-medium leading-relaxed text-[#5A453B] border-l-2 border-[#D49E8D]/30 pl-4"
+                                >
+                                    "{summary}"
+                                </motion.p>
+                            )}
+                        </motion.div>
+                    </div>
+                )}
+
                 {/* Content Section */}
-                <div className="p-8 md:px-12 md:pb-12 text-[#683B2B] text-lg leading-relaxed">
+                <div className="p-8 md:px-12 md:pb-12 text-[#683B2B] text-lg leading-relaxed font-serif">
                     {story.content.split('\n').map((p, i) => p && <p key={i} className="mb-6">{p}</p>)}
                 </div>
 
@@ -179,8 +281,12 @@ const StoryDetail = () => {
                     <div className="space-y-6">
                         {comments.map((comm, i) => (
                             <div key={i} className="flex gap-4 group">
-                                <div className="w-10 h-10 rounded-xl bg-orange-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                                    {comm.user?.avatar ? <img src={comm.user.avatar} className="w-full h-full object-cover" /> : <UserIcon className="w-5 h-5 text-[#82574A]" />}
+                                <div className="w-10 h-10 rounded-xl bg-[#D49E8D] flex-shrink-0 flex items-center justify-center overflow-hidden text-white font-black text-xs shadow-sm">
+                                    {comm.user?.avatar ? (
+                                        <img src={comm.user.avatar} className="w-full h-full object-cover" />
+                                    ) : (
+                                        (comm.user?.name || 'D').charAt(0).toUpperCase()
+                                    )}
                                 </div>
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">

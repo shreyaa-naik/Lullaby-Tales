@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 180" fill="none">
+  <!-- Main Stem -->
+  <path d="M60 170 Q55 120 70 80 Q75 50 65 20" stroke="#5A7040" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  
+  <!-- Side Branch 1 (Bottom Left) -->
+  <path d="M58 145 Q40 135 25 140" stroke="#5A7040" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <path d="M25 140 Q15 130 20 115 Q35 125 25 140Z" fill="#6B8A48" opacity="0.9"/>
+  <path d="M25 140 Q30 155 45 150 Q40 135 25 140Z" fill="#7A9952" opacity="0.8"/>
+
+  <!-- Side Branch 2 (Middle Right) -->
+  <path d="M66 110 Q85 100 100 110" stroke="#5A7040" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <path d="M100 110 Q110 100 105 85 Q90 95 100 110Z" fill="#6B8A48" opacity="0.9"/>
+  <path d="M100 110 Q105 125 115 120 Q110 105 100 110Z" fill="#7A9952" opacity="0.8"/>
+
+  <!-- Side Branch 3 (Middle Left) -->
+  <path d="M64 85 Q45 75 35 85" stroke="#5A7040" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <path d="M35 85 Q25 75 30 60 Q45 70 35 85Z" fill="#7A9952" opacity="0.85"/>
+
+  <!-- Side Branch 4 (Top Right) -->
+  <path d="M68 60 Q80 50 90 60" stroke="#5A7040" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <path d="M90 60 Q100 50 95 35 Q80 45 90 60Z" fill="#6B8A48" opacity="0.9"/>
+
+  <!-- Top Leaves -->
+  <path d="M65 20 Q55 5 70 0 Q80 15 65 20Z" fill="#7A9952" opacity="0.9"/>
+  <path d="M65 20 Q75 10 85 20 Q75 30 65 20Z" fill="#6B8A48" opacity="0.8"/>
+
+  <!-- Tiny Buds/Berries -->
+  <circle cx="22" cy="118" r="3" fill="#D49E8D" opacity="0.9"/>
+  <circle cx="108" cy="88" r="2.5" fill="#D49E8D" opacity="0.9"/>
+  <circle cx="68" cy="45" r="2" fill="#D49E8D" opacity="0.8"/>
+  
+  <!-- Delicate Veins (subtle) -->
+  <path d="M22 130 L28 123" stroke="#FAF6F2" stroke-width="0.5" opacity="0.3"/>
+  <path d="M102 100 L107 93" stroke="#FAF6F2" stroke-width="0.5" opacity="0.3"/>
+</svg>

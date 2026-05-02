@@ -1,13 +1,43 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Save, User, Lock, Bell, Palette } from 'lucide-react';
+import { Save, User, Lock, Bell, Palette, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 const Settings = () => {
     const navigate = useNavigate();
-    const { user, login } = useAuth();
+    const { user, login, logout } = useAuth();
     const [activeTab, setActiveTab] = useState('profile');
-    const [formData, setFormData] = useState({ name: user?.name || '', email: user?.email || '', bio: user?.bio || '', avatar: user?.avatar || '' });
+    const [formData, setFormData] = useState({ 
+        name: user?.name || '', 
+        email: user?.email || '', 
+        bio: user?.bio || '', 
+        tagline: user?.tagline || '',
+        avatar: user?.avatar || '' 
+    });
+
+    const handleDeleteAccount = async () => {
+        if (!window.confirm('Are you absolutely sure? This will permanently delete your tales, your profile, and all your data. This action cannot be undone.')) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/api/auth/delete-account`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+
+            if (res.ok) {
+                toast.success('Your story has ended here. We hope to see you again.');
+                logout();
+                navigate('/');
+            } else {
+                toast.error('Failed to delete account. Please try again.');
+            }
+        } catch (err) {
+            toast.error('Could not connect to the archives.');
+        }
+    };
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -24,7 +54,7 @@ const Settings = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://127.0.0.1:5000/api/auth/update-profile', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/update-profile`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -33,6 +63,7 @@ const Settings = () => {
                 body: JSON.stringify({
                     name: formData.name,
                     bio: formData.bio,
+                    tagline: formData.tagline,
                     avatar: formData.avatar
                 })
             });
@@ -67,8 +98,6 @@ const Settings = () => {
                 {[
                     { id: 'profile', icon: <User className="w-5 h-5" />, label: 'Edit Profile' },
                     { id: 'security', icon: <Lock className="w-5 h-5" />, label: 'Security' },
-                    { id: 'notifications', icon: <Bell className="w-5 h-5" />, label: 'Notifications' },
-                    { id: 'appearance', icon: <Palette className="w-5 h-5" />, label: 'Appearance' }
                 ].map(tab => (
                     <button 
                         key={tab.id}
@@ -81,6 +110,15 @@ const Settings = () => {
                         {tab.icon} {tab.label}
                     </button>
                 ))}
+
+                <div className="mt-auto pt-8 border-t border-[#683B2B]/5">
+                    <button 
+                        onClick={() => { logout(); navigate('/'); }}
+                        className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-bold text-red-500 hover:bg-red-50 transition-all text-left"
+                    >
+                        <LogOut className="w-5 h-5" /> Sign Out
+                    </button>
+                </div>
             </div>
 
             {/* Main Content Area */}
@@ -98,7 +136,9 @@ const Settings = () => {
                                     {formData.avatar ? (
                                         <img src={formData.avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
                                     ) : (
-                                        <User className="w-10 h-10" style={{ color: '#683B2B' }} />
+                                        <div className="w-full h-full flex items-center justify-center bg-[#D49E8D] text-white font-black text-2xl">
+                                            {(formData.name || 'A').charAt(0).toUpperCase()}
+                                        </div>
                                     )}
                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span className="text-white text-[10px] font-black uppercase tracking-widest">Change</span>
@@ -107,7 +147,18 @@ const Settings = () => {
                                 </div>
                                 <div>
                                     <h4 className="font-bold mb-1" style={{ color: '#683B2B' }}>Profile Photo</h4>
-                                    <p className="text-xs font-medium" style={{ color: '#82574A' }}>Upload a picture to personalize your author identity. JPG or PNG under 5MB.</p>
+                                    <div className="flex items-center gap-3">
+                                        <p className="text-xs font-medium" style={{ color: '#82574A' }}>Upload a picture to personalize your author identity.</p>
+                                        {formData.avatar && (
+                                            <button 
+                                                type="button" 
+                                                onClick={() => setFormData({ ...formData, avatar: '' })}
+                                                className="text-[10px] font-black uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors"
+                                            >
+                                                Remove Photo
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
@@ -117,6 +168,13 @@ const Settings = () => {
                                     <input type="text" className="w-full px-4 py-3 rounded-2xl font-medium outline-none transition-all"
                                            style={{ backgroundColor: 'rgba(250,246,242,0.5)', border: '1.5px solid rgba(104,59,43,0.1)', color: '#683B2B' }}
                                            value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold mb-2" style={{ color: '#683B2B' }}>Author Tagline</label>
+                                    <input type="text" className="w-full px-4 py-3 rounded-2xl font-medium outline-none transition-all"
+                                           style={{ backgroundColor: 'rgba(250,246,242,0.5)', border: '1.5px solid rgba(104,59,43,0.1)', color: '#683B2B' }}
+                                           placeholder="e.g. Dreamer · Writer · Story Collector"
+                                           value={formData.tagline} onChange={e => setFormData({ ...formData, tagline: e.target.value })} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold mb-2" style={{ color: '#683B2B' }}>Author Bio</label>
@@ -130,43 +188,45 @@ const Settings = () => {
                     )}
 
                     {activeTab === 'security' && (
-                        <div className="animate-fade-in-up">
-                            <h3 className="text-2xl font-bold mb-6" style={{ color: '#683B2B' }}>Account Security</h3>
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold mb-2" style={{ color: '#683B2B' }}>Current Password</label>
-                                    <input type="password" placeholder="••••••••" className="w-full px-4 py-3 rounded-2xl font-medium outline-none" style={{ backgroundColor: 'rgba(250,246,242,0.5)', border: '1.5px solid rgba(104,59,43,0.1)', color: '#683B2B' }} />
+                        <div className="animate-fade-in-up space-y-12">
+                            <div>
+                                <h3 className="text-2xl font-bold mb-6" style={{ color: '#683B2B' }}>Account Security</h3>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2" style={{ color: '#683B2B' }}>Current Password</label>
+                                        <input type="password" placeholder="••••••••" className="w-full px-4 py-3 rounded-2xl font-medium outline-none" style={{ backgroundColor: 'rgba(250,246,242,0.5)', border: '1.5px solid rgba(104,59,43,0.1)', color: '#683B2B' }} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-2" style={{ color: '#683B2B' }}>New Password</label>
+                                        <input type="password" placeholder="••••••••" className="w-full px-4 py-3 rounded-2xl font-medium outline-none" style={{ backgroundColor: 'rgba(250,246,242,0.5)', border: '1.5px solid rgba(104,59,43,0.1)', color: '#683B2B' }} />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-bold mb-2" style={{ color: '#683B2B' }}>New Password</label>
-                                    <input type="password" placeholder="••••••••" className="w-full px-4 py-3 rounded-2xl font-medium outline-none" style={{ backgroundColor: 'rgba(250,246,242,0.5)', border: '1.5px solid rgba(104,59,43,0.1)', color: '#683B2B' }} />
-                                </div>
+                            </div>
+
+                            <div className="pt-8 border-t border-red-100">
+                                <h3 className="text-xl font-bold mb-2 text-red-600">Danger Zone</h3>
+                                <p className="text-sm text-[#82574A] mb-6">Once you delete your account, there is no going back. Please be certain.</p>
+                                <button 
+                                    type="button"
+                                    onClick={handleDeleteAccount}
+                                    className="px-6 py-3 rounded-xl border-2 border-red-200 text-red-600 font-black text-[10px] uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all"
+                                >
+                                    Delete My Account
+                                </button>
                             </div>
                         </div>
                     )}
 
-                    {activeTab === 'notifications' && (
-                        <div className="animate-fade-in-up">
-                            <h3 className="text-2xl font-bold mb-6" style={{ color: '#683B2B' }}>Notifications</h3>
-                            <p className="font-medium" style={{ color: '#82574A' }}>Configure email alerts and push notifications for comments and new followers.</p>
+                    {activeTab === 'profile' && (
+                        <div className="pt-8 border-t" style={{ borderColor: 'rgba(104,59,43,0.1)' }}>
+                            <button type="submit" className="flex items-center gap-2 px-8 py-3.5 rounded-2xl font-black text-[#FAF6F2] transition-colors"
+                                    style={{ backgroundColor: '#D49E8D', boxShadow: '0 4px 16px rgba(212,158,141,0.3)' }}
+                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = '#C76A55'}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = '#D49E8D'}>
+                                <Save className="w-5 h-5" /> Save Changes
+                            </button>
                         </div>
                     )}
-
-                    {activeTab === 'appearance' && (
-                        <div className="animate-fade-in-up">
-                            <h3 className="text-2xl font-bold mb-6" style={{ color: '#683B2B' }}>Appearance</h3>
-                            <p className="font-medium" style={{ color: '#82574A' }}>Your reading interface is currently locked nicely to the beautifully warm crushed paper theme.</p>
-                        </div>
-                    )}
-
-                    <div className="pt-8 border-t" style={{ borderColor: 'rgba(104,59,43,0.1)' }}>
-                        <button type="submit" className="flex items-center gap-2 px-8 py-3.5 rounded-2xl font-black text-[#FAF6F2] transition-colors"
-                                style={{ backgroundColor: '#D49E8D', boxShadow: '0 4px 16px rgba(212,158,141,0.3)' }}
-                                onMouseEnter={e => e.currentTarget.style.backgroundColor = '#C76A55'}
-                                onMouseLeave={e => e.currentTarget.style.backgroundColor = '#D49E8D'}>
-                            <Save className="w-5 h-5" /> Save Changes
-                        </button>
-                    </div>
                 </form>
 
             </div>

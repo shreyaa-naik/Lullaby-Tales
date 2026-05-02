@@ -129,4 +129,48 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// @route   PUT api/auth/update-profile
+// @desc    Update user profile info
+router.put('/update-profile', auth, async (req, res) => {
+    const { name, bio, tagline, avatar } = req.body;
+    try {
+        let user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+
+        if (name) user.name = name;
+        if (bio !== undefined) user.bio = bio;
+        if (tagline !== undefined) user.tagline = tagline;
+        if (avatar !== undefined) user.avatar = avatar;
+
+        await user.save();
+        
+        // Return user without password
+        const updatedUser = await User.findById(req.user.id).select('-password');
+        res.json(updatedUser);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   DELETE api/auth/delete-account
+// @desc    Permanently delete user account and their stories
+router.delete('/delete-account', auth, async (req, res) => {
+    try {
+        // 1. Delete all stories by this user
+        await Story.deleteMany({ author: req.user.id });
+        
+        // 2. Delete notifications
+        await Notification.deleteMany({ user: req.user.id });
+        
+        // 3. Delete the user
+        await User.findByIdAndDelete(req.user.id);
+        
+        res.json({ msg: 'Account deleted successfully' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

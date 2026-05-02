@@ -59,21 +59,21 @@ const Footer = () => {
                                     { to: '/trending',  label: 'Trending' },
                                     { to: '/awards',    label: 'Awards' },
                                     { to: '/verify',    label: 'Verification' },
+                                    { to: '/about',     label: 'About' },
                                 ],
                             },
                             {
                                 heading: 'Author Studio',
                                 links: [
                                     { to: '/create-story', label: 'Start Writing' },
-                                    { to: '/dashboard',    label: 'My Analytics' },
-                                    { to: '/community',    label: 'Writer Forum' },
+                                    { to: '/community',    label: 'Community' },
                                 ],
                             },
                             {
                                 heading: 'Support',
                                 links: [
                                     { to: '/help',    label: 'Help Center' },
-                                    { to: '/privacy', label: 'Privacy Policy' },
+                                    { to: '/privacy', label: 'Privacy' },
                                 ],
                                 span: true,
                             },

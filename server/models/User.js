@@ -26,6 +26,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    tagline: {
+        type: String,
+        default: ""
+    },
     avatar: {
         type: String,
         default: ""
