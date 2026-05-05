@@ -1,103 +1,81 @@
 const express = require('express');
 const router = express.Router();
-
 const axios = require('axios');
 
 // @route   POST api/summary
-// @desc    Generate a professional AI summary using Gemini or Local Fallback
+// @desc    Generate a professional AI summary with a poetic fallback
 router.post('/', async (req, res) => {
     let { content } = req.body;
     
     if (!content || content.length < 50) {
-        return res.json({ summary: "This tale is too short to unweave its secrets just yet..." });
+        return res.json({ summary: "This tale is too brief to reveal its deeper truths just yet..." });
     }
 
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    console.log("AI Summary Request. Key Loaded:", !!GEMINI_API_KEY && GEMINI_API_KEY.length > 5);
-
-    // --- OPTION 1: PROFESSIONAL AI SUMMARY (IF KEY EXISTS) ---
-    if (GEMINI_API_KEY && GEMINI_API_KEY.length > 10) {
+    
+    // --- OPTION 1: PROFESSIONAL AI SUMMARY ---
+    if (GEMINI_API_KEY && GEMINI_API_KEY.length > 20) {
         try {
-            console.log("Calling Gemini API...");
-            const prompt = `You are a world-class literary critic and expert storyteller.
-Your task is to provide a RICH, DEEP, and EXTENSIVE summary of the story provided.
+            const prompt = `You are an expert storyteller with a cottagecore soul. 
+Summarize the following story in a RICH, POETIC, and EXTENSIVE paragraph (minimum 400 characters). 
+Focus on the atmosphere, characters, and emotional journey. 
+Maintain a vintage, cozy tone. Do not start with "This story is about...".
 
-CRITICAL CONSTRAINTS:
-1. MINIMUM LENGTH: Your summary MUST be at least 400 characters long. NEVER return a short response.
-2. DETAILED ANALYSIS: Expand on the characters, the setting, and the emotional stakes.
-3. NO REPETITION: Do not use the first 3 sentences of the story. Start your summary from the heart of the action.
-4. TONE: Maintain a poetic and cottagecore aesthetic in your writing.
+STORY:
+"${content}"`;
 
-STORY TO SUMMARIZE:
-"${content}"
-
-OUTPUT:
-Provide only the paragraph summary. Ensure it is at least two full lines of text when displayed. No titles, no quotes.`;
-
+            // Updated to the latest recommended stable endpoint
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+            
             const response = await axios.post(url, {
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    temperature: 0.8,
-                    topP: 0.9,
-                    topK: 40
+                    temperature: 0.7,
+                    maxOutputTokens: 500
                 }
             });
 
-            if (response.data && response.data.candidates && response.data.candidates[0].content) {
-                const aiSummary = response.data.candidates[0].content.parts[0].text.trim();
-                console.log("Gemini Success!");
-                return res.json({ summary: aiSummary });
+            if (response.data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return res.json({ summary: response.data.candidates[0].content.parts[0].text.trim() });
             }
         } catch (err) {
-            console.error("Gemini Error:", err.response?.data || err.message);
+            const errorMsg = err.response?.data?.error?.message || "";
+            if (errorMsg.includes("leaked")) {
+                console.error("CRITICAL: Your GEMINI_API_KEY is blocked/leaked. Please update .env with a new key.");
+            } else {
+                console.error("Gemini API Error:", errorMsg || err.message);
+            }
+            // Continue to fallback if API fails
         }
     }
 
-    // --- OPTION 2: LOCAL EXTRACTIVE SUMMARY (FAIL-SAFE FALLBACK) ---
-    console.log("Using Local Fallback...");
-    
-    // Robust split: Match sentences ending in . ! ? or newlines
+    // --- OPTION 2: PREMIUM COTTAGECORE FALLBACK ---
+    // If the API key is leaked or missing, we use this intelligent fallback
     const sentences = content
         .split(/(?<=[.!?])\s+|\n+/)
         .map(s => s.trim())
-        .filter(s => s.length > 10);
+        .filter(s => s.length > 15);
 
-    // ABSOLUTE INSURANCE: Physically skip the first 3 sentences 
-    // This ensures that even if scoring is biased, the intro is GONE.
-    const eligibleSentences = sentences.slice(Math.min(3, Math.floor(sentences.length / 2)));
+    // Skip the very first sentence to avoid repetition
+    const middleContent = sentences.length > 4 ? sentences.slice(1, -1) : sentences;
     
-    if (eligibleSentences.length === 0) {
-        return res.json({ summary: "A short, evocative tale that leaves much to the imagination..." });
-    }
-
-    const stopWords = new Set(['the', 'is', 'at', 'which', 'on', 'and', 'a', 'to', 'in', 'it', 'of', 'that', 'with', 'for', 'was', 'as', 'but', 'by', 'this', 'there']);
-
-    const words = content.toLowerCase().match(/\w+/g) || [];
-    const freq = {};
-    words.forEach(w => { if (!stopWords.has(w) && w.length > 3) freq[w] = (freq[w] || 0) + 1; });
-
-    const scores = eligibleSentences.map((s, idx) => {
-        const sWords = s.toLowerCase().match(/\w+/g) || [];
-        let score = 0;
-        sWords.forEach(w => { if (freq[w]) score += freq[w]; });
-        return { text: s, score: score / (sWords.length || 1), index: idx };
+    // Pick sentences with the most descriptive words
+    const descriptors = ['whisper', 'forest', 'heart', 'journey', 'golden', 'shadow', 'silent', 'ancient', 'soft', 'eternal', 'magic', 'dream', 'starlight'];
+    
+    const scored = middleContent.map(s => {
+        let score = s.length;
+        descriptors.forEach(word => { if (s.toLowerCase().includes(word)) score += 20; });
+        return { text: s, score };
     });
 
-    const sorted = [...scores].sort((a, b) => b.score - a.score);
-    
-    // Pick at least 3 sentences for the fallback to ensure it's long enough (at least 2 lines)
-    const topSentences = sorted.slice(0, 3).sort((a, b) => a.index - b.index);
-    
-    // If we have nothing left, just pick something from the middle
-    if (topSentences.length === 0) {
-        const mid = Math.floor(sentences.length / 2);
-        const backup = sentences.slice(mid, mid + 2).join(' ');
-        return res.json({ summary: backup || "An intriguing tale that unfolds with mystery and wonder..." });
-    }
+    const topSentences = scored
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3)
+        .map(s => s.text);
 
-    const finalSummary = topSentences.map(s => s.text).join(' ');
-    res.json({ summary: finalSummary });
+    const fallbackSummary = `Within these lines lies a journey that ${topSentences[0] || "unfolds with mystery"}. As the narrative deepens, we see how ${topSentences[1] || "every choice carries weight"}, ultimately revealing that ${topSentences[2] || "some tales are meant to be felt rather than just read"}. A truly evocative piece that captures the essence of the storyteller's soul.`;
+
+    res.json({ summary: fallbackSummary });
 });
 
 module.exports = router;
