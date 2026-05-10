@@ -24,7 +24,7 @@ const setup = async () => {
         const adminUser = await User.findOneAndUpdate(
             { email: myEmail }, 
             { $set: { isAdmin: true } },
-            { new: true }
+            { returnDocument: 'after' }
         );
         
         if (adminUser) {

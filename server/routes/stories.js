@@ -110,7 +110,7 @@ router.get('/:id', async (req, res) => {
             } catch (err) {}
         }
 
-        const story = await Story.findByIdAndUpdate(storyId, { $inc: { views: 1 } }, { new: true })
+        const story = await Story.findByIdAndUpdate(storyId, { $inc: { views: 1 } }, { returnDocument: 'after' })
             .populate('author', ['name'])
             .populate('comments.user', ['name', 'avatar']);
         
@@ -135,7 +135,7 @@ router.post('/:id/like', auth, async (req, res) => {
             // Unlike: Remove from both
             const updatedStory = await Story.findByIdAndUpdate(storyId, { 
                 $pull: { likedBy: userId }
-            }, { new: true });
+            }, { returnDocument: 'after' });
             
             updatedStory.likes = updatedStory.likedBy.length;
             await updatedStory.save();
@@ -147,7 +147,7 @@ router.post('/:id/like', auth, async (req, res) => {
             // Like: Add to both safely
             const updatedStory = await Story.findByIdAndUpdate(storyId, { 
                 $addToSet: { likedBy: userId }
-            }, { new: true });
+            }, { returnDocument: 'after' });
 
             updatedStory.likes = updatedStory.likedBy.length;
             await updatedStory.save();
@@ -277,7 +277,7 @@ router.put('/:id', auth, async (req, res) => {
         story = await Story.findByIdAndUpdate(
             req.params.id,
             { $set: { title, content, tags, image, status } },
-            { new: true }
+            { returnDocument: 'after' }
         );
         res.json(story);
     } catch (err) {
